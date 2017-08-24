@@ -2,11 +2,9 @@ module Rich
   class FilesController < ApplicationController
 
     before_filter :authenticate_rich_user
-    before_filter :set_rich_file, only: [:show, :update, :destroy]
+    before_filter :set_rich_file, only: [:show]
 
     layout "rich/application"
-
-    @@parent_folder = 0
 
     def index
       # byebug
@@ -19,11 +17,10 @@ module Rich
       alpha = params[:alpha] || 'true';
       # --^
       # parent id change
-      parent_id = (params[:parent_id].nil?) ? 0 : params[:parent_id].to_i
-      @@parent_folder = parent_id
+      parent_id = (params[:folder_id].nil?) ? -1 : params[:folder_id].to_i
 
       # to show specific file types, if have push 'folder' type to array
-      file_type = (file_type != 'false') ? file_type.split(",").push('folder') : []
+      file_type = (file_type != 'false') ? file_type.split(",") : []
       # items per page from config
       per_page = Rich.options[:paginates_per]
       current_page = params[:page].to_i
@@ -45,6 +42,8 @@ module Rich
         @items.where("rich_file_content_type in (?)", file_type)
       end
 
+      @folders = Folder.folders(parent_id)
+
       if params[:scoped] == 'true'
         @items = @items.where("owner_type = ? AND owner_id = ?", params[:scope_type], params[:scope_id])
       end
@@ -53,23 +52,29 @@ module Rich
         # previous
         # @items = @items.where('rich_file_file_name LIKE ?', "%#{params[:search]}%").where.not(simplified_type: 'folder')
 
-        partial_query = "WITH RECURSIVE recu AS (
-                          SELECT *
-                            FROM rich_rich_files
-                            WHERE parent_id = ?
-                          UNION all
-                          SELECT c.*
-                            FROM recu p
-                            JOIN rich_rich_files c ON c.parent_id = p.id AND p.id != p.parent_id
-                        )"
-
-        unless @type == 'all'
-          partial_query << " SELECT * FROM recu WHERE rich_file_file_name LIKE ? AND simplified_type = ? ORDER BY simplified_type ASC, rich_file_file_name ASC;"
-          @items = RichFile.find_by_sql [ partial_query, parent_id.to_i, "%#{params[:search].gsub(' ','-')}%", @type]
+        if params[:searchtype] == 'filename'
+          @items = @items.where('rich_file_file_name LIKE ?', "%#{params[:search]}%")
         else
-          partial_query << " SELECT * FROM recu WHERE rich_file_file_name LIKE ? AND NOT simplified_type = 'folder' ORDER BY simplified_type ASC, rich_file_file_name ASC;"
-          @items = RichFile.find_by_sql [ partial_query, parent_id.to_i, "%#{params[:search].gsub(' ','-')}%"]
+          @items = @items.where('titles LIKE ?', "%#{params[:search]}%")
         end
+
+        # partial_query = "WITH RECURSIVE recu AS (
+        #                   SELECT *
+        #                     FROM rich_rich_files
+        #                     WHERE parent_id = ?
+        #                   UNION all
+        #                   SELECT c.*
+        #                     FROM recu p
+        #                     JOIN rich_rich_files c ON c.parent_id = p.id AND p.id != p.parent_id
+        #                 )"
+
+        # unless @type == 'all'
+        #   partial_query << " SELECT * FROM recu WHERE rich_file_file_name LIKE ? AND simplified_type = ? ORDER BY simplified_type ASC, rich_file_file_name ASC;"
+        #   @items = RichFile.find_by_sql [ partial_query, parent_id.to_i, "%#{params[:search].gsub(' ','-')}%", @type]
+        # else
+        #   partial_query << " SELECT * FROM recu WHERE rich_file_file_name LIKE ? AND NOT simplified_type = 'folder' ORDER BY simplified_type ASC, rich_file_file_name ASC;"
+        #   @items = RichFile.find_by_sql [ partial_query, parent_id.to_i, "%#{params[:search].gsub(' ','-')}%"]
+        # end
 
         # manual paginate
         start_point = (current_page) * per_page
@@ -101,7 +106,6 @@ module Rich
     def show
       # show is used to retrieve single files through XHR requests after a file has been uploaded
       if(params[:id])
-        # list all files
         @file = @rich_file
         render :layout => false
       else
@@ -111,67 +115,112 @@ module Rich
 
     def create
       # validate folder level at folder creation
-      if params[:current_level].to_i > Rich.options[:folder_level] && params[:simplified_type] == 'folder'
+      simplified_type = params[:simplified_type]
+
+      if (params[:current_level].to_i > Rich.options[:folder_level]) && (simplified_type == 'folder')
         return
       end
 
-      @file = RichFile.new(simplified_type: params[:simplified_type])
+      @file = (simplified_type == 'folder') ? Folder.new : RichFile.new(simplified_type: simplified_type)
 
-      if(params[:scoped] == 'true')
+      if(params[:scoped] == 'true' && simplified_type != 'folder')
         @file.owner_type = params[:scope_type]
         @file.owner_id = params[:scope_id].to_i
       end
+
+      folder_id = params[:folder_id] || -1
       # use the file from Rack Raw Upload
       file_params = params[:file] || params[:qqfile]
       if(file_params)
         file_params.content_type = Mime::Type.lookup_by_extension(file_params.original_filename.split('.').last.to_sym)
+        # custom image sizes
+        @file.custom_image_styles = (params[:custom_image_styles].split(',').map { |e| e.to_sym } << :rich_thumb) || []
+        # custom file size
+        @file.file_size = params[:file_size]
+        @file.folder_id = folder_id
         @file.rich_file = file_params
       else
         # folder creation
-        @file.rich_file_file_name = params[:file_name]
-        @file.rich_file_content_type = params[:simplified_type]
+        @file.folder_name = params[:file_name]
+        @file.parent_id = folder_id
       end
-
-      # save its' parent id
-      @file.parent_id = @@parent_folder
 
       if @file.save
         response = {  :success => true,
-                      :rich_id => @file.id,
-                      :parent_id => @@parent_folder }
+                      :rich_id => @file.id }
       else
         response = { :success => false,
                      :error => "Could not upload your file:\n- "+@file.errors.to_a[-1].to_s,
                      :params => params.inspect }
       end
       render :json => response, :content_type => "text/html"
-
     end
 
     def update
-      new_filename_without_extension = params[:filename].parameterize
-      if new_filename_without_extension.present?
-        new_filename = @rich_file.rename!(new_filename_without_extension)
-        render :json => { :success => true, :filename => new_filename, :uris => @rich_file.uri_cache }
+      if params[:dragged_id]
+        if(params[:dragged_type] == 'folder')
+          @file = Folder.find(params[:dragged_id])
+          @file.parent_id = params[:id]
+        else
+          @file = RichFile.find(params[:dragged_id])
+          @file.folder_id = params[:id]
+        end
+        @file.save!
+        render :json => { :success => true, :rich_id => params[:dragged_id] }
+
+      elsif params[:title]
+        @file = RichFile.find(params[:id])
+        @file.titles = params[:title]
+        @file.save!
+        render :json => { :success => true, :title => @file.titles }
+
+      elsif params[:move_to_parent]
+        if(params[:item_type] == 'folder')
+          @file = Folder.find(params[:id])
+          @file.parent_id = (params[:move_to_parent] == '-1') ? -1 : Folder.find(params[:move_to_parent]).parent_id
+        else
+          @file = RichFile.find(params[:id])
+          @file.folder_id = (params[:move_to_parent] == '-1') ? -1 : Folder.find(params[:move_to_parent]).parent_id
+        end
+        @file.save!
+        render :json => { :success => true, :rich_id => params[:id] }
       else
-        render :nothing => true, :status => 500
+        if(params[:type] == 'folder')
+          @file = Folder.find(params[:id])
+        else
+          @file = RichFile.find(params[:id])
+        end
+        new_filename_without_extension = params[:filename].parameterize
+        if new_filename_without_extension.present?
+          if(params[:type] != 'folder')
+            @file.custom_image_styles = eval(@file.uri_cache).keys
+            new_filename = @file.rename!(new_filename_without_extension)
+            render :json => { :success => true, :filename => new_filename, :uris => @file.uri_cache }
+          else
+            @file.folder_name = new_filename_without_extension
+            @file.save!
+            render :json => { :success => true, :filename => new_filename_without_extension }
+          end
+        else
+          render :nothing => true, :status => 500
+        end
       end
     end
 
     def destroy
-      if(params[:id])
+      id = params[:id]
+      if(id)
+        if(params[:type] == 'folder')
+          @file = Folder.find(id)
+        else
+          @file = RichFile.find(id)
+          @file.custom_image_styles = eval(@file.uri_cache).keys
+        end
         begin
-          @rich_file.destroy
-          @fileid = params[:id]
+          @file.destroy
         rescue Exception => e
           @error = 'sorry cannot delete'
         end
-        # if @rich_file.destroy!
-        #   @fileid = params[:id]
-        # else
-        #   response = {  :success => false,
-        #                 :error => 'cannot delete' }
-        # end
       end
     end
 

@@ -19,8 +19,10 @@ rich.AssetPicker.prototype = {
 		params.scoped = options.scoped || false;
 		params.alpha = options.alpha || true;
 		params.file_type = options.file_type || false;
-		params.parent_id = options.parent_id || 0;
+		params.folder_id = options.folder_id || -1;
 		params.folder_level = options.folder_level;
+		params.custom_image_styles = options.custom_image_styles || [];
+		console.log(options);
 		if(params.scoped == true) {
 			params.scope_type = options.scope_type
 			params.scope_id = options.scope_id;
@@ -30,7 +32,7 @@ rich.AssetPicker.prototype = {
 		window.open(url, 'filebrowser', "resizable=yes,scrollbars=yes,width=860,height=500")
   },
 
-	setAsset: function(dom_id, asset, id, type){
+	setAsset: function(dom_id, asset, id, type, name){
 		var split_field_name = $(dom_id).attr('id').split('_')
 		if (split_field_name[split_field_name.length - 1] == "id") {
 			$(dom_id).val(id);
@@ -41,6 +43,10 @@ rich.AssetPicker.prototype = {
     if(type=='image') {
 		  $(dom_id).siblings('img.rich-image-preview').first().attr({src: asset});
     }
+    else{
+		  $(dom_id).siblings('img.rich-image-preview').first().attr({src: "http://icons.iconarchive.com/icons/graphicloads/100-flat/256/home-icon.png"});
+    }
+    $(dom_id).siblings('p.rich-filename').text(name);
   },
 
 };

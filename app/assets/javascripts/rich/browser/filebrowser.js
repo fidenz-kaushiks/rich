@@ -15,7 +15,8 @@ rich.Browser = function(){
     // for back button
     previousParent: new Array(),
     // to validate folder creation
-    maxLevel: $.QueryString["folder_level"]
+    maxLevel: $.QueryString["folder_level"],
+    serchTypeFile: true
 	};
 
   // following contains folders' data
@@ -28,7 +29,7 @@ rich.Browser = function(){
     file_name: 'untitle',
     // current level only to validate
     current_level: 0,
-    parent_id: 0,
+    folder_id: -1,
   };
 };
 
@@ -48,6 +49,8 @@ rich.Browser.prototype = {
       $('#sort-by-date').show();
       $('#sort-alphabetically').hide();
     }
+
+    jQuery.event.props.push('dataTransfer');
 	},
 
 	initStyles: function(opt, def) {
@@ -140,18 +143,21 @@ rich.Browser.prototype = {
   },
 
 	selectItem: function(item) {
-		var url = $(item).data('uris')[this._options.currentStyle];
+		var url = $(item).data('uris');
 		var id = $(item).data('rich-asset-id');
 		var type = $(item).data('rich-asset-type');
 		var name = $(item).data('rich-asset-name');
-    var parent = $(item).data('rich-asset-parent');
     var self = this;
 
 		// if($.QueryString["CKEditor"]=='picker') {
       // if selection is a folder
+      // console.log(url);
     if (type == 'folder') {
       this.showLoadingIconAndRefreshList();
+      id = $(item).data('folder-id');
+      var parent = $(item).data('folder-parent');
       // get items inside the folder
+
       $.ajax({
         url: this.updateUrlParameter(self.urlWithParams(),id),
         type: 'get',
@@ -160,14 +166,15 @@ rich.Browser.prototype = {
           self.setLoading(false);
           self._options.previousParent.push(parent);
           // change folders' parent and its' level
-          self._folder.parent_id = id;
+          self._folder.folder_id = id;
           self._folder.current_level++;
-          console.log(self._folder.parent_id);
+          console.log(self._folder.folder_id);
         }
       });
     } else {
       if($.QueryString["CKEditor"]=='picker') {
-        window.opener.assetPicker.setAsset($.QueryString["dom_id"], url, id, type);
+        alert(url);
+        window.opener.assetPicker.setAsset($.QueryString["dom_id"], url[this._options.currentStyle], id, type, name);
       }
       window.opener.CKEDITOR.tools.callFunction($.QueryString["CKEditorFuncNum"], url, id, name);
     }
@@ -190,8 +197,8 @@ rich.Browser.prototype = {
   // back button function
   goBack: function () {
     // validate at root end
-    this._folder.parent_id = this._options.previousParent != 0 ? this._options.previousParent.pop() : 0;
-
+    this._folder.folder_id = this._options.previousParent != 0 ? this._options.previousParent.pop() : -1;
+    console.log(this._folder.folder_id);
     this.showLoadingIconAndRefreshList();
     var self = this;
     $.ajax({
@@ -208,6 +215,8 @@ rich.Browser.prototype = {
   performSearch: function(query) {
     this.showLoadingIconAndRefreshList();
     this._options.searchQuery = query;
+
+    this._options.serchTypeFile = $('input[name=file-search-type]:checked').val();
 
     var self = this;
     $.ajax({
@@ -227,8 +236,9 @@ rich.Browser.prototype = {
     }
     if (this._options.searchQuery) {
       url += '&search=' + this._options.searchQuery;
+      url += '&searchtype=' + this._options.serchTypeFile;
     }
-    return this.updateUrlParameter(url, this._folder.parent_id);
+    return this.updateUrlParameter(url, this._folder.folder_id);
   },
 
   showLoadingIconAndRefreshList: function() {
@@ -283,11 +293,14 @@ rich.Browser.prototype = {
       self.setLoading(true);
       var newFilename = $(this).find('input').val();
       var fileId = $(this).find('id').val();
+      var type = p_tag.data('file-type');
+      console.log(newFilename + ' ' + fileId + ' ' + type);
       $.ajax({
         url: p_tag.data('update-url'),
         type: 'PUT',
-        data: { filename: newFilename, id: fileId },
+        data: { filename: newFilename, id: fileId, type: type },
         success: function(data) {
+          console.log(data.filename);
           form.siblings('p').text(data.filename);
           form.siblings('img').attr('data-uris', data.uris);
         },
@@ -333,26 +346,129 @@ rich.Browser.prototype = {
 
   // update at url
   updateUrlParameter: function (url, value) {
-    if (url.search('parent_id') != -1) {
-      return url.replace(/(parent_id=)[^\&]+/, '$1' + value);
+    if (url.search('folder_id') != -1) {
+      return url.replace(/(folder_id=)[^\&]+/, '$1' + value);
     } else {
-      return (url += '&parent_id=' + value);
+      return (url += '&folder_id=' + value);
     }
-
   },
 
   // to parse parent to rich 'Uploader'
   returnParentId: function () {
-    // console.log(this._folder.parent_id);
-    return this._folder.parent_id;
+    // console.log(this._folder.folder_id);
+    return this._folder.folder_id;
+  },
+
+  drag: function (event) {
+    var item = event.target;
+    var id = null;
+    var type = $(item).data('rich-asset-type');
+
+    if (type == 'folder' ) {
+      id = $(item).attr('data-folder-id');
+    } else {
+      id = $(item).data('rich-asset-id');
+    }
+    console.log('folder' + id);
+    event.dataTransfer.setData('id', id);
+    event.dataTransfer.setData('type', type);
+  },
+
+  drop: function (event) {
+    event.preventDefault();
+    var item = event.target;
+    var url = $(item).siblings('p').data('update-url');
+    var self = this;
+
+    var dragged_id = event.dataTransfer.getData("id");
+    var dragged_type = event.dataTransfer.getData("type");
+
+    self.setLoading(true);
+
+    $.ajax({
+      url: url,
+      type: 'PUT',
+      data: { dragged_id: dragged_id, dragged_type: dragged_type},
+      success: function(data) {
+        if (dragged_type == 'folder') {
+          $("#image-folder"+data.rich_id).parent().remove();
+        } else {
+          $("#image-file"+data.rich_id).parent().remove();
+        }
+        self.setLoading(false);
+      },
+      complete: function() {
+      }
+    });
+  },
+
+  editTitle: function (event) {
+
+    var item = event.target;
+    var preTitle = $(item).attr('data-rich-asset-title');
+    var url = $(item).siblings('p').data('update-url');
+    var self = this;
+
+    var newTitle = prompt("update", preTitle);
+
+    if (newTitle != null) {
+      self.setLoading(true);
+      $.ajax({
+        url: url,
+        type: 'PUT',
+        data: { title: newTitle },
+        success: function(data) {
+          $(item).attr('data-rich-asset-title', data.title);
+          self.setLoading(false);
+        }
+      });
+    }
+  },
+
+  moveToParent: function (item, key) {
+
+    var parentId = $(item).attr('data-rich-asset-parent');
+    var type = $(item).attr('data-rich-asset-type');
+    var url = $(item).siblings('p').data('update-url');
+    var self = this;
+
+    if (key == 'toRoot') {
+      parentId = -1;
+    }
+
+    if (type == 'folder') {
+      parentId = $(item).attr('data-folder-parent');
+    } else {
+      parentId = $(item).attr('data-rich-asset-parent');
+    }
+
+    console.log(item);
+
+    self.setLoading(true);
+    $.ajax({
+      url: url,
+      type: 'PUT',
+      data: { move_to_parent: parentId, item_type: type },
+      success: function(data) {
+        if (type == 'folder') {
+          $("#image-folder"+data.rich_id).parent().remove();
+        } else {
+          $("#image-file"+data.rich_id).parent().remove();
+        }
+        self.setLoading(false);
+      }
+    });
   }
+
 };
 
 
 var browser;
+var item;
 
 $(function(){
 
+  item = "#items li img[class='rich-item']";
 	browser = new rich.Browser();
 	browser.initialize();
 
@@ -388,7 +504,7 @@ $(function(){
 	});
 
 	// hook up item insertion
-	$('body').on('click', '#items li img', function(e){
+	$('body').on('click', "#items li img[class='rich-item']", function(e){
 		browser.selectItem(e.target);
 	});
 
@@ -409,21 +525,69 @@ $(function(){
   });
 
   // filename update
-  $('body').on('click', '#items li:not(#uploadBlock) p', function() {
+  $('body').on('click', '#items li:not(#uploadBlock) p', function () {
+    console.log($(this));
     browser.showNameEditInput($(this));
   });
 
   // insert folder
-  $('#insert-folder').on('click',function (e) {
+  $('#insert-folder').on('click', function (e) {
     browser.insertNewFolder();
     e.preventDefault();
   });
 
   // back button
-  $('#back-link').on('click',function (e) {
+  $('#back-link').on('click', function (e) {
     // console.log(browser.returnParentId());
-    if (browser.returnParentId() != 0) {
+    if (browser.returnParentId() != -1) {
       browser.goBack();
+    }
+  });
+
+  // when drag start
+  $('body').on('dragstart', "#items li img[class='rich-item']", function (e) {
+    browser.drag(e);
+  });
+
+  $("body").on('dragover', "#items li img[class='rich-item']", function (e) {
+    e.preventDefault();
+  });
+
+  $("body").on('drop', "#items li img[class='rich-item']", function (e) {
+    browser.drop(e);
+  });
+
+  $("body").on('click', "#items img:nth-of-type(1)[data-rich-asset-type!='folder']" ,function (e) {
+    browser.editTitle(e);
+  });
+
+  $.contextMenu({
+    selector: "body #items li img[class='rich-item']",
+    items: {
+      toParent: {
+        name: "move to parent folder",
+        callback: function(key, opt){
+          browser.moveToParent(opt.$trigger, key);
+        },
+        disabled: function(key, opt) {
+          var id = $(opt.$trigger).attr('data-rich-asset-parent');
+          if (id == -1) {
+            return true;
+          }
+        }
+      },
+      toRoot: {
+        name: "move to root folder",
+        callback: function(key, opt){
+          browser.moveToParent(opt.$trigger, key);
+        },
+        disabled: function(key, opt) {
+          var id = $(opt.$trigger).attr('data-rich-asset-parent');
+          if (id == -1) {
+            return true;
+          }
+        }
+      }
     }
   });
 });

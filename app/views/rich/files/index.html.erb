@@ -4,6 +4,9 @@
     <input type="text" placeholder="<%= t('search_bar_placeholder') %>"/>
   </div>
 
+  <input type="radio" name="file-search-type" value="filename" checked="true" >file name
+  <input type="radio" name="file-search-type" value="title">title
+
 	<div id="loading" style="display:none;"></div>
 
   <div id="sort-toggle">
@@ -52,12 +55,13 @@
 
   <%
     # sort folders first and then files
-    @folders = @items.where(simplified_type: 'folder')
-    @files = @items.where.not(simplified_type: 'folder')
+    # @folders = @items.where(simplified_type: 'folder')
+    # @files = @items.where.not(simplified_type: 'folder')
+    # byebug
   %>
 
   <!-- render files and folders separately -->
-	<%= render :partial => "file", :collection => @folders, :as => :file %>
-  <%= render :partial => "file", :collection => @files, :as => :file %>
+	<%= render :partial => "folder", :collection => @folders, :as => :folder %>
+  <%= render :partial => "file", :collection => @items, :as => :file %>
 
 </ul>

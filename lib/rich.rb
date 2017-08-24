@@ -18,6 +18,13 @@ module Rich
     @@image_styles = image_styles
   end
 
+  def self.image_custom_styles
+    @@image_custom_styles.merge({ :rich_thumb => "100x100#" })
+  end
+  def self.image_custom_styles=(image_custom_styles)
+    @@image_custom_styles = image_custom_styles
+  end
+
   def self.video_styles
     @@video_styles.merge({ :rich_thumb => { :geometry => "320x240", :format => 'mp4', :processors => [:transcoder] } })
   end
@@ -26,6 +33,10 @@ module Rich
   end
 
   @@image_styles = {
+    :thumb => "100x100#"
+  }
+
+  @@image_custom_styles = {
     :thumb => "100x100#"
   }
 
@@ -69,6 +80,9 @@ module Rich
 
   mattr_accessor :folder_level
   @@folder_level = 3
+
+  mattr_accessor :file_size
+  @@file_size = 1.megabyte
 
   mattr_accessor :file_path
   @@file_path
@@ -132,7 +146,8 @@ module Rich
       :preview_size => self.preview_size,
       :hidden_input => self.hidden_input,
       :paginates_per => self.paginates_per,
-      :folder_level => self.folder_level
+      :folder_level => self.folder_level,
+      :image_custom_styles => self.image_custom_styles
     }
     editor_options = self.editor.merge(base)
 

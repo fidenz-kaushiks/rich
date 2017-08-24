@@ -1,25 +1,26 @@
-<li class="clickable" id="<%= file.id %>">
-  <img  id="file<%= file.id %>"
+<li class="clickable" id="file<%= file.id %>">
+  <img  src="<%= asset_path('icons/icon-edit-title.png') %>"
+        data-rich-asset-title="<%= file.titles %>"
+        class="pencil-edit"
+        draggable="false"
+  />
+  <img  id="image-file<%= file.id %>"
         src="<%= thumb_for_file(file) %>"
         data-uris="<%= file.uri_cache %>"
         data-rich-asset-id="<%= file.id %>"
 				data-rich-asset-type="<%= file.simplified_type %>"
 				data-rich-asset-name="<%= file.filename %>"
-        data-rich-asset-parent="<%= file.parent_id %>"
+        data-rich-asset-parent="<%= file.folder_id %>"
+        draggable="true"
+        class="rich-item"
   />
-  <p  id="<%= file.id %>"
+  <p  id="file<%= file.id %>"
       data-update-url="<%= file_path(file) %>"
       data-input-placeholder="<%= t('filename_update_input_placeholder') %>"
+      data-file-type="file"
       title="<%= t('filename_update_hover_hint') %>">
     <%= file.filename %>
   </p>
 
-  <%
-      confirm_message = nil
-      file.simplified_type == 'folder' ? confirm_message = :delete_confirm_folder : confirm_message = :delete_confirm
-  %>
-
-  <% unless file.id == -1 || file.parent_id == -1 %>
-    <%= link_to "delete", "/rich/files/"+file.id.to_s, :method => :delete, :remote => true, :data => { :confirm => t(confirm_message) }, :class => "delete", :title => t(:delete) %>
-  <% end %>
+  <%= link_to "delete", "/rich/files/"+file.id.to_s+'?type=file', :method => :delete, :remote => true, :data => { :confirm => t(:delete_confirm) }, :class => "delete", :title => t(:delete) %>
 </li>

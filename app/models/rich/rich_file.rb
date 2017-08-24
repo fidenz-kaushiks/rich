@@ -4,17 +4,39 @@ require 'kaminari'
 
 module Rich
   class RichFile < ActiveRecord::Base
-	include Backends::Paperclip
+		include Backends::Paperclip
 
-	belongs_to :parent, class_name: "RichFile"
-	has_many :children, class_name: "RichFile", foreign_key: :parent_id, dependent: :destroy
+		belongs_to :folder
 
-	scope :images,  -> (id) { where("simplified_type in (?)",['image', 'folder']).where(parent_id: id) }
-	scope :videos,   -> (id) { where("simplified_type in (?)",['video', 'folder']).where(parent_id: id) }
-	scope :files,   -> (id) { where("simplified_type in (?)",['file', 'folder']).where(parent_id: id ) }
-	scope :audios,   -> (id) { where("simplified_type in (?)",['audio', 'folder']).where(parent_id: id) }
-	scope :any,   -> (id) { where(parent_id: id) }
+		def custom_image_styles=(value)
+		  @custom_image_styles = value
+		end
 
-	paginates_per Rich.options[:paginates_per]
+		def custom_image_styles
+			@custom_image_styles || []
+		end
+
+		def file_size=(value)
+		  @file_size = value
+		end
+
+		def file_size
+			@file_size || Rich.file_size
+		end
+
+		validate :image_size
+		def image_size
+			if rich_file_file_size > file_size
+				errors[:base] << "must be smaller than #{file_size}"
+			end
+		end
+
+		scope :images,  -> (id) { where("simplified_type in (?)",['image']).where(folder_id: id) }
+		scope :videos,   -> (id) { where("simplified_type in (?)",['video']).where(folder_id: id) }
+		scope :files,   -> (id) { where("simplified_type in (?)",['file']).where(folder_id: id ) }
+		scope :audios,   -> (id) { where("simplified_type in (?)",['audio']).where(folder_id: id) }
+		scope :any,   -> (id) { where(folder_id: id) }
+
+		paginates_per Rich.options[:paginates_per]
   end
 end

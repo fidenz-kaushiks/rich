@@ -11,7 +11,6 @@ if (Object.const_defined?("Formtastic") && Gem.loaded_specs["formtastic"].versio
           :class => 'rich-picker',
           :style => editor_options[:style]
         }
-
         input_wrapping do
           label_html <<
           input_field(local_input_options) <<
@@ -47,6 +46,17 @@ private
         end
       end
 
+      def preview_file_name
+        method_value = object.send(method)
+        column_type = column_for(method) ? column_for(method).type : :string
+        if column_type == :integer
+          file = Rich::RichFile.find(method_value)
+          file.rich_file_file_name
+        else
+          method_value
+        end
+      end
+
       def button
         %Q{
             <a href='#{Rich.editor[:richBrowserUrl]}' class='button'>
@@ -57,19 +67,22 @@ private
 
       def javascript
         %Q{
-            <script>
-              $(function(){
-                $('##{input_html_options[:id]}_input a').click(function(e){
-                  e.preventDefault(); assetPicker.showFinder('##{input_html_options[:id]}', #{editor_options.to_json})
-                });
+          <script>
+            $(function(){
+              $('##{input_html_options[:id]}_input a').click(function(e){
+                e.preventDefault();
+                assetPicker.showFinder('##{input_html_options[:id]}', #{editor_options.to_json})
               });
-            </script>
+            });
+          </script>
         }.html_safe
       end
 
       def preview
-        return unless editor_options[:type] != 'file'
+        # byebug
+        # return unless editor_options[:type] != 'file'
 
+        filename = preview_file_name
         path = preview_image_path
         klass = "class='rich-image-preview'"
         style = "style='max-width:#{editor_options[:preview_size]}; max-height:#{editor_options[:preview_size]};'"
@@ -77,9 +90,12 @@ private
           if path == "broken"
             %Q{
               </br></br><img src='#{preview_image_path}' #{klass} #{style} />
+              </br><p class="rich-filename">#{filename}</p>
             }.html_safe
+          else
           %Q{
              </br></br><img src='#{preview_image_path}' #{klass} #{style} />
+             </br><p class="rich-filename">#{filename}</p>
             }.html_safe
           end
         else

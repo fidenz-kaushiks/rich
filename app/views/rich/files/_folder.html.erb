@@ -1,0 +1,18 @@
+<li class="clickable" id="folder<%= folder.id %>">
+  <img  id="image-folder<%= folder.id %>"
+        src="<%= asset_path('icons/icon-empty.png') %>"
+        data-rich-asset-type="folder"
+        data-folder-id="<%= folder.id %>"
+        data-folder-parent="<%= folder.parent_id %>"
+        class="rich-item"
+        draggable="true"
+  />
+  <p  id="folder<%= folder.id %>"
+      data-update-url="<%= file_path(folder) %>"
+      data-file-type="folder">
+    <%= folder.folder_name %>
+  </p>
+
+  <%= link_to "delete", "/rich/files/"+folder.id.to_s+'?type=folder', :method => :delete, :remote => true, :data => { :confirm => t(:delete_confirm_folder) }, :class => "delete", :title => t(:delete) %>
+
+</li>

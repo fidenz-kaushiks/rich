@@ -10,3 +10,4 @@
 //= require rich/browser/extensions
 //= require rich/browser/uploader
 //= require rich/browser/filebrowser
+//= require jquery.contextMenu.js

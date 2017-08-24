@@ -12,7 +12,8 @@ module Rich
         do_not_validate_attachment_file_type :rich_file
         validates_attachment_presence :rich_file, unless: :is_a_folder?
         validate :check_content_type, unless: :is_a_folder?
-        validates_attachment_size :rich_file, :less_than=>15.megabyte, :message => "must be smaller than 15MB" , unless: :is_a_folder?
+        validates_attachment_size :rich_file,
+                                  :less_than => Proc.new {|a| a.file_size }, unless: :is_a_folder?
 
         before_create :clean_file_name, unless: :is_a_folder?
 
@@ -30,8 +31,13 @@ module Rich
       end
 
       def set_styles
+        # byebug
         if self.simplified_type=="image" || self.rich_file_content_type.to_s["image"]
-          Rich.image_styles
+          if self.custom_image_styles.empty?
+            Rich.image_styles
+          else
+            Rich.image_custom_styles.slice(*self.custom_image_styles)
+          end
         elsif self.simplified_type=="video" || self.rich_file_content_type.to_s["video"]
           Rich.video_styles
         else
@@ -40,12 +46,8 @@ module Rich
       end
 
       def rename!(new_filename_without_extension)
-        unless simplified_type == 'folder'
-          new_filename = new_filename_without_extension + File.extname(rich_file_file_name)
-          rename_files!(new_filename)
-        else
-          new_filename = new_filename_without_extension
-        end
+        new_filename = new_filename_without_extension + File.extname(rich_file_file_name)
+        rename_files!(new_filename)
         update_column(:rich_file_file_name, new_filename)
         cache_style_uris_and_save
         new_filename

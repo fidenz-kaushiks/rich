@@ -1,1 +1,5 @@
-<%= render :partial => 'file', :locals => {:file => @file} %>
+<% if @file.is_a?(Folder) %>
+	<%= render :partial => 'folder', :locals => {:folder => @file} %>
+<% else %>
+	<%= render :partial => 'file', :locals => {:file => @file} %>
+<% end %>
