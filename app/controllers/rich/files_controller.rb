@@ -157,16 +157,35 @@ module Rich
     end
 
     def update
-      if params[:dragged_id]
-        if(params[:dragged_type] == 'folder')
-          @file = Folder.find(params[:dragged_id])
+      # id = params[:drag_id] || params[:id]
+      # type = params[:type]
+
+      # if(type == 'folder')
+      #   file = Folder.find(id)
+      # else
+      #   file = RichFile.find(id)
+      # end
+
+      # case params[:method]
+      # when 'drag'
+      #   byebug
+      #   file.parent_id
+      # end
+
+
+
+
+
+      if params[:drag_id]
+        if(params[:type] == 'folder')
+          @file = Folder.find(params[:drag_id])
           @file.parent_id = params[:id]
         else
-          @file = RichFile.find(params[:dragged_id])
+          @file = RichFile.find(params[:drag_id])
           @file.folder_id = params[:id]
         end
         @file.save!
-        render :json => { :success => true, :rich_id => params[:dragged_id] }
+        render :json => { :success => true, :rich_id => params[:drag_id] }
 
       elsif params[:title]
         @file = RichFile.find(params[:id])
@@ -175,7 +194,7 @@ module Rich
         render :json => { :success => true, :title => @file.titles }
 
       elsif params[:move_to_parent]
-        if(params[:item_type] == 'folder')
+        if(params[:type] == 'folder')
           @file = Folder.find(params[:id])
           @file.parent_id = (params[:move_to_parent] == '-1') ? -1 : Folder.find(params[:move_to_parent]).parent_id
         else

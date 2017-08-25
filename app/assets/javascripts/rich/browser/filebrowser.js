@@ -31,6 +31,14 @@ rich.Browser = function(){
     current_level: 0,
     folder_id: -1,
   };
+
+  this._drapNdrop = {
+    drag: {
+      id: null,
+      type: null
+    }
+  };
+
 };
 
 rich.Browser.prototype = {
@@ -173,7 +181,6 @@ rich.Browser.prototype = {
       });
     } else {
       if($.QueryString["CKEditor"]=='picker') {
-        alert(url);
         window.opener.assetPicker.setAsset($.QueryString["dom_id"], url[this._options.currentStyle], id, type, name);
       }
       window.opener.CKEDITOR.tools.callFunction($.QueryString["CKEditorFuncNum"], url, id, name);
@@ -359,41 +366,57 @@ rich.Browser.prototype = {
     return this._folder.folder_id;
   },
 
+  dragGet: function () {
+    return {
+      id: this._drapNdrop.drag.id,
+      type: this._drapNdrop.drag.type
+    }
+  },
+
   drag: function (event) {
     var item = event.target;
     var id = null;
     var type = $(item).data('rich-asset-type');
 
-    if (type == 'folder' ) {
+    if (type == 'folder') {
       id = $(item).attr('data-folder-id');
     } else {
       id = $(item).data('rich-asset-id');
     }
-    console.log('folder' + id);
-    event.dataTransfer.setData('id', id);
-    event.dataTransfer.setData('type', type);
+
+    this._drapNdrop.drag.type = type;
+    this._drapNdrop.drag.id = id;
   },
 
   drop: function (event) {
     event.preventDefault();
+
     var item = event.target;
     var url = $(item).siblings('p').data('update-url');
+    var type = $(item).data('rich-asset-type');
+    var id = $(item).attr('data-folder-id');
+    var dType = this._drapNdrop.drag.type;
+    var dId = this._drapNdrop.drag.id;
     var self = this;
 
-    var dragged_id = event.dataTransfer.getData("id");
-    var dragged_type = event.dataTransfer.getData("type");
+    if (type != 'folder' || id == dId)
+      return;
 
     self.setLoading(true);
 
     $.ajax({
       url: url,
       type: 'PUT',
-      data: { dragged_id: dragged_id, dragged_type: dragged_type},
+      data: {
+        drag_id: this._drapNdrop.drag.id,
+        type: dType,
+        method: 'drag'
+      },
       success: function(data) {
-        if (dragged_type == 'folder') {
-          $("#image-folder"+data.rich_id).parent().remove();
+        if (dType == 'folder') {
+          $("#image-folder" + data.rich_id).parent().remove();
         } else {
-          $("#image-file"+data.rich_id).parent().remove();
+          $("#image-file" + data.rich_id).parent().remove();
         }
         self.setLoading(false);
       },
@@ -425,6 +448,11 @@ rich.Browser.prototype = {
     }
   },
 
+  disablMove: function (item) {
+    if ($(item).attr('data-rich-asset-parent') == -1)
+      return true;
+  },
+
   moveToParent: function (item, key) {
 
     var parentId = $(item).attr('data-rich-asset-parent');
@@ -434,21 +462,19 @@ rich.Browser.prototype = {
 
     if (key == 'toRoot') {
       parentId = -1;
-    }
-
-    if (type == 'folder') {
-      parentId = $(item).attr('data-folder-parent');
     } else {
-      parentId = $(item).attr('data-rich-asset-parent');
+      if (type == 'folder') {
+        parentId = $(item).attr('data-folder-parent');
+      } else {
+        parentId = $(item).attr('data-rich-asset-parent');
+      }
     }
-
-    console.log(item);
 
     self.setLoading(true);
     $.ajax({
       url: url,
       type: 'PUT',
-      data: { move_to_parent: parentId, item_type: type },
+      data: { move_to_parent: parentId, type: type },
       success: function(data) {
         if (type == 'folder') {
           $("#image-folder"+data.rich_id).parent().remove();
@@ -473,7 +499,6 @@ $(function(){
 	browser.initialize();
 
   $('#upload').on('click',function (e) {
-    console.log('from onclick: '+browser.returnParentId());
     new rich.Uploader(browser.returnParentId());
   });
 
@@ -504,7 +529,7 @@ $(function(){
 	});
 
 	// hook up item insertion
-	$('body').on('click', "#items li img[class='rich-item']", function(e){
+	$('body').on('click', item, function(e){
 		browser.selectItem(e.target);
 	});
 
@@ -526,7 +551,6 @@ $(function(){
 
   // filename update
   $('body').on('click', '#items li:not(#uploadBlock) p', function () {
-    console.log($(this));
     browser.showNameEditInput($(this));
   });
 
@@ -538,22 +562,23 @@ $(function(){
 
   // back button
   $('#back-link').on('click', function (e) {
-    // console.log(browser.returnParentId());
     if (browser.returnParentId() != -1) {
       browser.goBack();
     }
   });
 
   // when drag start
-  $('body').on('dragstart', "#items li img[class='rich-item']", function (e) {
+  $('body').on('dragstart', item, function (e) {
     browser.drag(e);
   });
 
-  $("body").on('dragover', "#items li img[class='rich-item']", function (e) {
+  // when drag over
+  $("body").on('dragover', item, function (e) {
     e.preventDefault();
   });
 
-  $("body").on('drop', "#items li img[class='rich-item']", function (e) {
+  // when drop
+  $("body").on('drop', item, function (e) {
     browser.drop(e);
   });
 
@@ -562,7 +587,7 @@ $(function(){
   });
 
   $.contextMenu({
-    selector: "body #items li img[class='rich-item']",
+    selector: item,
     items: {
       toParent: {
         name: "move to parent folder",
@@ -570,10 +595,7 @@ $(function(){
           browser.moveToParent(opt.$trigger, key);
         },
         disabled: function(key, opt) {
-          var id = $(opt.$trigger).attr('data-rich-asset-parent');
-          if (id == -1) {
-            return true;
-          }
+          return browser.disablMove(opt.$trigger);
         }
       },
       toRoot: {
@@ -582,10 +604,7 @@ $(function(){
           browser.moveToParent(opt.$trigger, key);
         },
         disabled: function(key, opt) {
-          var id = $(opt.$trigger).attr('data-rich-asset-parent');
-          if (id == -1) {
-            return true;
-          }
+          return browser.disablMove(opt.$trigger);
         }
       }
     }
