@@ -102,15 +102,20 @@ header {
   }
 }
 
+#rich-search-type {
+	float: left;
+	margin: 13px;
+}
+
 #loading {
   float: left;
-  width: 16px;
-  height: $headerHeight;
+  width: 19px;
+  height: 46px;
   margin-left: 20px;
   background: image-url('rich/loading.png') no-repeat center;
 }
 
-#insert-toggle, #view-toggle, #sort-toggle, #folder, #back {
+#insert-toggle, #view-toggle, #sort-toggle, #folder, #back{
   float: right;
   height: $headerHeight;
   overflow: hidden;
@@ -305,6 +310,12 @@ header {
 	#uploadBlock:hover .placeholder .spinner {
 		background-position: 0 -32px;
 	}
+
+	.pencil-edit {
+		position: absolute;
+		margin-left: 5px;
+		margin-top: 5px;
+  }
 
 }
 
