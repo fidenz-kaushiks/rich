@@ -25,6 +25,9 @@ module Rich
       per_page = Rich.options[:paginates_per]
       current_page = params[:page].to_i
 
+      # byebug
+      @folders = Folder.folders(parent_id)
+
       @items = case @type
       when 'image'
         RichFile.images(parent_id)
@@ -41,8 +44,6 @@ module Rich
       if file_type.blank?
         @items.where("rich_file_content_type in (?)", file_type)
       end
-
-      @folders = Folder.folders(parent_id)
 
       if params[:scoped] == 'true'
         @items = @items.where("owner_type = ? AND owner_id = ?", params[:scope_type], params[:scope_id])
@@ -77,9 +78,10 @@ module Rich
         # end
 
         # manual paginate
-        start_point = (current_page) * per_page
-        end_point = (current_page + 1) * per_page
-        @items = @items[start_point, per_page]
+        # start_point = (current_page) * per_page
+        # end_point = (current_page + 1) * per_page
+        # @items = @items[start_point, per_page]
+
       end
 
       if alpha == 'true' && !@search
@@ -89,11 +91,13 @@ module Rich
         @items = @items.order("created_at DESC")
       end
 
-      # byepass search
-      unless @search
-        @items = @items.page params[:page]
-      end
+      start_point = (current_page) * per_page
+      end_point = (current_page + 1) * per_page
+      all = (@folders.to_a + @items.to_a)[start_point, end_point] || []
+      _partition = all.partition { |e| e.is_a? Folder }
 
+      @folders = _partition[0]
+      @items = _partition[1]
       # stub for new file
       @rich_asset = RichFile.new
 
@@ -171,10 +175,6 @@ module Rich
       #   byebug
       #   file.parent_id
       # end
-
-
-
-
 
       if params[:drag_id]
         if(params[:type] == 'folder')

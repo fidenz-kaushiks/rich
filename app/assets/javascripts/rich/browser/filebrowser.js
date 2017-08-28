@@ -7,7 +7,7 @@ rich.Browser = function(){
 	this._options = {
 		currentStyle: '',
 		insertionModeMany: false,
-		currentPage: 1,
+		currentPage: 0,
 		loading: false,
 		reachedBottom: false,
 		viewModeGrid: true,
@@ -449,7 +449,7 @@ rich.Browser.prototype = {
   },
 
   disablMove: function (item) {
-    if ($(item).attr('data-rich-asset-parent') == -1)
+    if ($(item).attr('data-rich-asset-parent') == -1 || $(item).attr('data-folder-parent') == -1)
       return true;
   },
 
