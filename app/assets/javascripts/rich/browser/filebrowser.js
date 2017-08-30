@@ -6,6 +6,7 @@ rich.Browser = function(){
 
 	this._options = {
 		currentStyle: '',
+    customStyles: new Array(),
 		insertionModeMany: false,
 		currentPage: 0,
 		loading: false,
@@ -29,7 +30,7 @@ rich.Browser = function(){
     file_name: 'untitle',
     // current level only to validate
     current_level: 0,
-    folder_id: -1,
+    folder_id: -1
   };
 
   this._drapNdrop = {
@@ -183,7 +184,21 @@ rich.Browser.prototype = {
       if($.QueryString["CKEditor"]=='picker') {
         window.opener.assetPicker.setAsset($.QueryString["dom_id"], url[this._options.currentStyle], id, type, name);
       }
-      window.opener.CKEDITOR.tools.callFunction($.QueryString["CKEditorFuncNum"], url, id, name);
+
+      var imageUrl = url[this._options.currentStyle];
+
+      if (imageUrl == undefined) {
+        customStyles = '';
+        $.each(url, function(key, value){
+          customStyles += key + ', ';
+        });
+        var selectedCustomStyle = prompt("available styles", customStyles);
+        if (selectedCustomStyle != null && customStyles.includes(selectedCustomStyle)) {
+          window.opener.CKEDITOR.tools.callFunction($.QueryString["CKEditorFuncNum"], url[selectedCustomStyle], id, name);
+        }
+      } else {
+        window.opener.CKEDITOR.tools.callFunction($.QueryString["CKEditorFuncNum"], imageUrl, id, name);
+      }
     }
 		// } else {
 		// 	window.opener.CKEDITOR.tools.callFunction($.QueryString["CKEditorFuncNum"], url, id, name);
