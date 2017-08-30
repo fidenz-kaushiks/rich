@@ -86,9 +86,11 @@ module Rich
 
       if alpha == 'true' && !@search
         @items = @items.order("simplified_type ASC").order("rich_file_file_name ASC")
+        @folders = @folders.order("folder_name ASC")
         # @items = @items.order("rich_file_file_name ASC")
       elsif !@search
         @items = @items.order("created_at DESC")
+        @folders = @folders.order("created_at DESC")
       end
 
       start_point = (current_page) * per_page
@@ -118,6 +120,7 @@ module Rich
     end
 
     def create
+      # byebug
       # validate folder level at folder creation
       simplified_type = params[:simplified_type]
 
@@ -138,7 +141,11 @@ module Rich
       if(file_params)
         file_params.content_type = Mime::Type.lookup_by_extension(file_params.original_filename.split('.').last.to_sym)
         # custom image sizes
-        @file.custom_image_styles = (params[:custom_image_styles].split(',').map { |e| e.to_sym } << :rich_thumb) || []
+        unless (params[:custom_image_styles] == 'undefined')
+          @file.custom_image_styles = params[:custom_image_styles].split(',').map { |e| e.to_sym } << :rich_thumb
+        else
+          @file.custom_image_styles = []
+        end
         # custom file size
         @file.file_size = params[:file_size]
         @file.folder_id = folder_id
