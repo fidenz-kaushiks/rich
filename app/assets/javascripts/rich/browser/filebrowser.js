@@ -16,7 +16,7 @@ rich.Browser = function(){
     // for back button
     previousParent: new Array(),
     // to validate folder creation
-    maxLevel: $.QueryString["folder_level"],
+    maxLevel: 1000,
     serchTypeFile: true
 	};
 
@@ -185,9 +185,9 @@ rich.Browser.prototype = {
         window.opener.assetPicker.setAsset($.QueryString["dom_id"], url[this._options.currentStyle], id, type, name);
       }
 
-      var imageUrl = url[this._options.currentStyle];
 
-      if (imageUrl == undefined) {
+      var imageUrl = url[this._options.currentStyle];
+      if (imageUrl == undefined && type == 'image') {
         customStyles = '';
         $.each(url, function(key, value){
           customStyles += key + ', ';
