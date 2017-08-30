@@ -5,6 +5,7 @@ if (Object.const_defined?("Formtastic") && Gem.loaded_specs["formtastic"].versio
       attr_reader :editor_options
 
       def to_html
+        # byebug
         @editor_options = Rich.options(options[:config], object_name, object.id)
 
         local_input_options = {
@@ -47,7 +48,11 @@ private
       end
 
       def preview_file_name
+        # byebug
         method_value = object.send(method)
+
+        return "empty" unless method_value.present?
+
         column_type = column_for(method) ? column_for(method).type : :string
         if column_type == :integer
           file = Rich::RichFile.find(method_value)
@@ -79,9 +84,8 @@ private
       end
 
       def preview
-        # byebug
         # return unless editor_options[:type] != 'file'
-
+        # byebug
         filename = preview_file_name
         path = preview_image_path
         klass = "class='rich-image-preview'"
