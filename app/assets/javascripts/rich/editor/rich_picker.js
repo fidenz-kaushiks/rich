@@ -21,7 +21,7 @@ rich.AssetPicker.prototype = {
 		params.file_type = options.file_type || false;
 		params.folder_id = options.folder_id || -1;
 		params.folder_level = options.folder_level;
-		params.custom_image_styles = options.custom_image_styles || [];
+		params.custom_image_styles = options.custom_image_styles || undefined;
 		console.log(options);
 		if(params.scoped == true) {
 			params.scope_type = options.scope_type
@@ -44,7 +44,7 @@ rich.AssetPicker.prototype = {
 		  $(dom_id).siblings('img.rich-image-preview').first().attr({src: asset});
     }
     else{
-		  $(dom_id).siblings('img.rich-image-preview').first().attr({src: "http://icons.iconarchive.com/icons/graphicloads/100-flat/256/home-icon.png"});
+		  $(dom_id).siblings('img.rich-image-preview').first().attr({src: ""});
     }
     $(dom_id).siblings('p.rich-filename').text(name);
   },
