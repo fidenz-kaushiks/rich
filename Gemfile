@@ -1,5 +1,4 @@
-source "http://rubygems.org"
-
+source 'http://rubygems.org'
 # Declare your gem's dependencies in rich.gemspec.
 # Bundler will treat runtime dependencies like base dependencies, and
 # development dependencies will be added by default to the :development group.
@@ -12,20 +11,19 @@ gemspec
 
 # To use debugger
 # gem 'ruby-debug'
+# gem 'byebug'
 
-#gem 'jquery-rails'
-#gem 'sass-rails'
-gem 'byebug'
+# gem 'jquery-rails'
+# gem 'sass-rails'
 gem 'paperclip-av-transcoder'
 gem 'jquery_context_menu-rails'
 
 # Development: Formtastic
-#gem 'formtastic'
+# gem 'formtastic'
 
 # Development: AA
-#gem 'activeadmin', :git => 'https://github.com/gregbell/active_admin.git', :branch => '0.3.x-stable'
-#gem 'activeadmin', :git => 'https://github.com/gregbell/active_admin.git', :branch => 'master'
-#gem "meta_search",    '>= 1.1.0.pre'
-#gem 'inherited_resources'
-#gem 'uglifier'
-
+# gem 'activeadmin', :git => 'https://github.com/gregbell/active_admin.git', :branch => '0.3.x-stable'
+# gem 'activeadmin', :git => 'https://github.com/gregbell/active_admin.git', :branch => 'master'
+# gem "meta_search",    '>= 1.1.0.pre'
+# gem 'inherited_resources'
+# gem 'uglifier'
