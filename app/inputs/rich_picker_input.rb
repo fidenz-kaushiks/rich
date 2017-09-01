@@ -35,7 +35,7 @@ private
         method_value = object.send(method)
 
         # return placeholder image if this is a non-image picker OR if there is no value set
-        return editor_options[:placeholder_image] if editor_options[:type].to_s == 'file'
+        return editor_options[:placeholder_image] if editor_options[:type].to_s != 'image'
         return editor_options[:placeholder_image] unless method_value.present?
 
         column_type = column_for(method) ? column_for(method).type : :string
@@ -48,7 +48,6 @@ private
       end
 
       def preview_file_name
-        # byebug
         method_value = object.send(method)
 
         return "empty" unless method_value.present?
@@ -93,7 +92,7 @@ private
         if path
           if path == "broken"
             %Q{
-              </br></br><img src='#{preview_image_path}' #{klass} #{style} />
+              </br></br><img src='#{Rich.placeholder_image}' #{klass} #{style} />
               </br><p class="rich-filename">#{filename}</p>
             }.html_safe
           else

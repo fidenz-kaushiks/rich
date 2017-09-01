@@ -24,8 +24,8 @@ module Rich
 			@file_size || Rich.file_size
 		end
 
-		validate :image_size
-		def image_size
+		before_create :_size
+		def _size
 			if rich_file_file_size > file_size
 				errors[:base] << "must be smaller than #{file_size}"
 			end
@@ -38,5 +38,11 @@ module Rich
 		scope :any,   -> (id) { where(folder_id: id) }
 
 		paginates_per Rich.options[:paginates_per]
+
+		def self.custom_styles_list
+			list = Array.new
+			Rich.image_custom_styles.each{|style, size| list << style.to_s + " : " + size.sub('#',' px') }
+			list
+		end
   end
 end

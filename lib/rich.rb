@@ -8,7 +8,7 @@ require "rich/engine"
 module Rich
 
   image_types = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg']
-  video_types = ['application/mp4', 'video/mp4', 'audio/mp4', 'video/x-msvideo']
+  video_types = ['application/mp4', 'video/mp4', 'audio/mp4', 'video/x-msvideo', 'video/quicktime']
   audio_types = ['audio/mpeg3', 'audio/x-mpeg-3', 'audio/mpeg']
   # configure image styles
   def self.image_styles
@@ -82,7 +82,7 @@ module Rich
   @@folder_level = 3
 
   mattr_accessor :file_size
-  @@file_size = 1.megabyte
+  @@file_size = 10.megabyte
 
   mattr_accessor :file_path
   @@file_path
@@ -147,7 +147,8 @@ module Rich
       :hidden_input => self.hidden_input,
       :paginates_per => self.paginates_per,
       :folder_level => self.folder_level,
-      :image_custom_styles => self.image_custom_styles
+      :image_custom_styles => self.image_custom_styles,
+      :file_size => self.file_size
     }
     editor_options = self.editor.merge(base)
 

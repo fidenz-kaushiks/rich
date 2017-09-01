@@ -21,7 +21,7 @@ rich.AssetPicker.prototype = {
 		params.file_type = options.file_type || false;
 		params.folder_id = options.folder_id || -1;
 		params.folder_level = options.folder_level;
-		params.custom_image_styles = options.custom_image_styles || undefined;
+		params.custom_image_styles = options.image_custom_styles || undefined;
 		console.log(options);
 		if(params.scoped == true) {
 			params.scope_type = options.scope_type
@@ -33,7 +33,7 @@ rich.AssetPicker.prototype = {
   },
 
 	setAsset: function(dom_id, asset, id, type, name){
-		var split_field_name = $(dom_id).attr('id').split('_')
+		var split_field_name = $(dom_id).attr('id').split('_');
 		if (split_field_name[split_field_name.length - 1] == "id") {
 			$(dom_id).val(id);
 		} else {
@@ -44,7 +44,7 @@ rich.AssetPicker.prototype = {
 		  $(dom_id).siblings('img.rich-image-preview').first().attr({src: asset});
     }
     else{
-		  $(dom_id).siblings('img.rich-image-preview').first().attr({src: ""});
+		  $(dom_id).siblings('img.rich-image-preview').first().attr({src: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="});
     }
     $(dom_id).siblings('p.rich-filename').text(name);
   },
