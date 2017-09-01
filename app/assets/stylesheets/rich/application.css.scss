@@ -27,6 +27,8 @@ $subtle: #f3f3f3;
 $light: #888888;
 $dark: #686868;
 $hoverChangeName: #fcf8e3;
+$green: #009900;
+$white: #ffffff;
 
 
 $imageSize: 100px;
@@ -481,4 +483,48 @@ ul.scopes {
 		background: $light;
 	}
 
+	li#custom-styles.label {
+		color: $white;
+		@include rounded;
+		padding: 0 $margin / 2;
+		background: $green;
+	}
+
+}
+
+.tooltip {
+	cursor: pointer;
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px black;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: auto;
+  background-color: $light;
+  color: $subtle;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1;
+  top: 140%;
+  left: 50%;
+  margin-left: -50px;
+  opacity: 0;
+  transition: opacity 1s;
+}
+
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: -11%;
+  left: 50%;
+  margin-left: -5px;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
 }

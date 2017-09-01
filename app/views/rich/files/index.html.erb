@@ -36,7 +36,16 @@
 
   <ul id="styles" class="scopes">
     <li class="label"><%= t(:available_styles) %></li>
+    <li id="custom-styles" class="label tooltip">
+      <%= t(:custom_styles) %>
+      <span class="tooltiptext">
+        <% @custom_styles.each do |style| %>
+          <%= style %><br>
+        <% end %>
+      </span>
+    </li>
   </ul>
+
 
 </header>
 
@@ -55,14 +64,6 @@
     <p><%= t(:upload_a_file) %></p>
   </li>
 
-  <%
-    # sort folders first and then files
-    # @folders = @items.where(simplified_type: 'folder')
-    # @files = @items.where.not(simplified_type: 'folder')
-    # byebug
-  %>
-
-  <!-- render files and folders separately -->
 	<%= render :partial => "folder", :collection => @folders, :as => :folder %>
   <%= render :partial => "file", :collection => @items, :as => :file %>
 
