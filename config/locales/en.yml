@@ -23,6 +23,7 @@ en:
   insert_folder: "New folder"
   insert_folder_tip: "insert new folder"
   back_link: "previous folder"
+  custom_styles: "custom styles"
   errors:
     messages:
       wrong_size: "is the wrong size (should be %{file_size})"
