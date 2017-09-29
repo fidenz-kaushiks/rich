@@ -26,7 +26,7 @@ rich.Uploader = function(parentId){
 				  scoped: this._options.scoped,
 				  scope_type: this._options.scope_type,
 				  scope_id: this._options.scope_id,
-				  parent_id: this._options.parent_id
+				  parent_id: parentId
 		},
 		debug: true,
 		onComplete: function(id, fileName, responseJSON) { self.uploadComplete(id, fileName, responseJSON); },

@@ -40,6 +40,8 @@ rich.AssetPicker.prototype = {
 
     if(type=='image') {
 		  $(dom_id).siblings('img.rich-image-preview').first().attr({src: asset});
+    }else{
+			$(dom_id).siblings('img.rich-image-preview').first().attr({src: 'https://vignette4.wikia.nocookie.net/mrmen/images/5/52/Small.gif/revision/latest?cb=20100731114437'});
     }
   },
 

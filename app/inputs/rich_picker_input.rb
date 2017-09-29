@@ -68,7 +68,7 @@ private
       end
 
       def preview
-        return unless editor_options[:type] != 'file'
+        return unless editor_options[:type] != 'file' or editor_options[:type] != 'any'
 
         path = preview_image_path
         klass = "class='rich-image-preview'"

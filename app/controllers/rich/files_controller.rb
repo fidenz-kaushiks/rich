@@ -1,5 +1,6 @@
 module Rich
   class FilesController < ApplicationController
+    include ApplicationHelper
 
     before_filter :authenticate_rich_user
     before_filter :set_rich_file, only: [:show, :update, :destroy]
@@ -115,6 +116,8 @@ module Rich
         return
       end
 
+      parent_id = params[:parent_id]
+
       @file = RichFile.new(simplified_type: params[:simplified_type])
 
       if(params[:scoped] == 'true')
@@ -128,17 +131,20 @@ module Rich
         @file.rich_file = file_params
       else
         # folder creation
+        _resource = decode_base64_image("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVQYV2P4DwABAQEAWk1v8QAAAABJRU5ErkJggg==")
+        folder_params = Rack::Multipart::UploadedFile.new(_resource[:tempfile].path)
+        @file.rich_file = folder_params
         @file.rich_file_file_name = params[:file_name]
         @file.rich_file_content_type = params[:simplified_type]
       end
 
       # save its' parent id
-      @file.parent_id = @@parent_folder
+      @file.parent_id = parent_id
 
       if @file.save
         response = {  :success => true,
                       :rich_id => @file.id,
-                      :parent_id => @@parent_folder }
+                      :parent_id => parent_id }
       else
         response = { :success => false,
                      :error => "Could not upload your file:\n- "+@file.errors.to_a[-1].to_s,
@@ -172,6 +178,37 @@ module Rich
         #   response = {  :success => false,
         #                 :error => 'cannot delete' }
         # end
+      end
+    end
+
+    def decode_base64_image(obj_hash)
+      file = nil
+      if obj_hash.try(:match, %r{^data:(.*?);(.*?),(.*)$})
+        image_data = split_base64(obj_hash)
+        image_data_string = image_data[:data]
+        image_data_binary = Base64.decode64(image_data_string)
+
+        temp_img_file = Tempfile.new("")
+        temp_img_file.binmode
+        temp_img_file << image_data_binary
+        temp_img_file.rewind
+
+        img_params = {:filename => "image.#{image_data[:extension]}", :type => image_data[:type], :tempfile => temp_img_file}
+        file = img_params
+      end
+      return file
+    end
+
+    def split_base64(uri_str)
+      if uri_str.match(%r{^data:(.*?);(.*?),(.*)$})
+        uri = Hash.new
+        uri[:type] = $1 # "image/gif"
+        uri[:encoder] = $2 # "base64"
+        uri[:data] = $3 # data string
+        uri[:extension] = $1.split('/')[1] # "gif"
+        return uri
+      else
+        return nil
       end
     end
 

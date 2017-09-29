@@ -169,6 +169,12 @@ rich.Browser.prototype = {
       if($.QueryString["CKEditor"]=='picker') {
         window.opener.assetPicker.setAsset($.QueryString["dom_id"], url, id, type);
       }
+
+      console.log('1 ' + $.QueryString["CKEditorFuncNum"]);
+      console.log('2 ' + url);
+      console.log('3 ' + id);
+      console.log('4 ' + name);
+
       window.opener.CKEDITOR.tools.callFunction($.QueryString["CKEditorFuncNum"], url, id, name);
     }
 		// } else {
@@ -177,13 +183,13 @@ rich.Browser.prototype = {
 
     if (type != 'folder') {
       // wait a short while before closing the window or regaining focus
-      window.setTimeout(function(){
-        if(self._options.insertionModeMany == false) {
-          window.close();
-        } else {
-          window.focus();
-        }
-      },100);
+      // window.setTimeout(function(){
+      //   if(self._options.insertionModeMany == false) {
+      //     window.close();
+      //   } else {
+      //     window.focus();
+      //   }
+      // },100);
     }
 	},
 
