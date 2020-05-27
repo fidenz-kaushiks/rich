@@ -10,7 +10,6 @@ rich.AssetPicker.prototype = {
 	showFinder: function(dom_id, options){
 		// open a popup
 		var params = {};
-		console.log('asdf');
 		params.CKEditor = 'picker'; // this is not CKEditor
 		params.default_style = options.default_style;
 		params.allowed_styles = options.allowed_styles;
@@ -50,4 +49,3 @@ rich.AssetPicker.prototype = {
 
 // Rich Asset input
 var assetPicker = new rich.AssetPicker();
-console.log('asdf');

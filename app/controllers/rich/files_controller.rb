@@ -139,7 +139,6 @@ module Rich
 
       # save its' parent id
       @file.parent_id = parent_id
-
       if @file.save
         response = {  :success => true,
                       :rich_id => @file.id,

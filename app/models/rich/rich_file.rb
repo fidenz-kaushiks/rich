@@ -6,7 +6,7 @@ module Rich
   class RichFile < ActiveRecord::Base
 	include Backends::Paperclip
 
-	belongs_to :parent, class_name: "RichFile"
+	belongs_to :parent, class_name: "RichFile", optional: true
 	has_many :children, class_name: "RichFile", foreign_key: :parent_id, dependent: :destroy
 
 	scope :images,  -> (id) { where("simplified_type in (?)",['image', 'folder']).where(parent_id: id) }
@@ -16,5 +16,6 @@ module Rich
 	scope :any,   -> (id) { where(parent_id: id) }
 
 	paginates_per Rich.options[:paginates_per]
+
   end
 end
