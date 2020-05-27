@@ -59,7 +59,7 @@ private
         %Q{
             <script>
               $(function(){
-                $('##{input_html_options[:id]}_input a').click(function(e){
+                $('##{input_html_options[:id]}').siblings('a').click(function(e){
                   e.preventDefault(); assetPicker.showFinder('##{input_html_options[:id]}', #{editor_options.to_json})
                 });
               });

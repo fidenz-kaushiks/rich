@@ -1,4 +1,4 @@
-class RefactorImageToFile < ActiveRecord::Migration
+class RefactorImageToFile < ActiveRecord::Migration[6.0]
   def change
     rename_table :rich_rich_images, :rich_rich_files
 

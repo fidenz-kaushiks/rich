@@ -1,4 +1,4 @@
-class CreateRichRichImages < ActiveRecord::Migration
+class CreateRichRichImages < ActiveRecord::Migration[6.0]
   def change
     create_table :rich_rich_images do |t|
 

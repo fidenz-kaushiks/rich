@@ -10,6 +10,7 @@ rich.AssetPicker.prototype = {
 	showFinder: function(dom_id, options){
 		// open a popup
 		var params = {};
+		console.log('asdf');
 		params.CKEditor = 'picker'; // this is not CKEditor
 		params.default_style = options.default_style;
 		params.allowed_styles = options.allowed_styles;
@@ -39,9 +40,9 @@ rich.AssetPicker.prototype = {
 		}
 
     if(type=='image') {
-		  $(dom_id).siblings('img.rich-image-preview').first().attr({src: asset});
+		$(dom_id).siblings('img.rich-image-preview').first().attr({src: asset});
     }else{
-			$(dom_id).siblings('img.rich-image-preview').first().attr({src: 'https://vignette4.wikia.nocookie.net/mrmen/images/5/52/Small.gif/revision/latest?cb=20100731114437'});
+		$(dom_id).siblings('img.rich-image-preview').first().attr({src: 'https://vignette4.wikia.nocookie.net/mrmen/images/5/52/Small.gif/revision/latest?cb=20100731114437'});
     }
   },
 
@@ -49,3 +50,4 @@ rich.AssetPicker.prototype = {
 
 // Rich Asset input
 var assetPicker = new rich.AssetPicker();
+console.log('asdf');

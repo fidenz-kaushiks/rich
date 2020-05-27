@@ -2,15 +2,14 @@ module Rich
   class FilesController < ApplicationController
     include ApplicationHelper
 
-    before_filter :authenticate_rich_user
-    before_filter :set_rich_file, only: [:show, :update, :destroy]
+    before_action :authenticate_rich_user
+    before_action :set_rich_file, only: [:show, :update, :destroy]
 
     layout "rich/application"
 
     @@parent_folder = 0
 
     def index
-      # byebug
       @type = params[:type]
       @search = params[:search].present?
       # -- v
