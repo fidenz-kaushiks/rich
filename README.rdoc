@@ -281,3 +281,11 @@ Rich, the affluent editor. By Bastiaan Terhorst and the Contributors[https://git
 Sponsored by Perceptor[http://perceptor.nl].
 
 This project is licenced under the MIT License. See MIT-LICENSE for details.
+
+== Changes for rails 5.2 and above
+
+* Add Rails.application.config.assets.precompile += %w( icons/icon-empty.png ) in side config/initializers/assets.rb
+* User gem 'sprockets' and gem 'sprockets-rails', :require => 'sprockets/railtie'
+* Add Rails.application.config.assets.precompile += %w( application.js ) to config/initializers/assets.rb
+* Add //= require rich to app/assets/javascripts/active_admin.js
+* Migrations: add :rich_rich_file_id as integer
