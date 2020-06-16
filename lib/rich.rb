@@ -235,6 +235,8 @@ module Rich
       require 'rich/backends/paperclip'
     elsif self.backend == :carrierwave
       require 'rich/backends/carrierwave'
+    elsif self.backend == :storage
+      require 'rich/backends/storage'
     end
   end
 

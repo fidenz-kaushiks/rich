@@ -1,25 +1,26 @@
+<% blob = file.blob %>
 <li class="clickable" id="<%= file.id %>">
   <img  id="file<%= file.id %>"
         src="<%= thumb_for_file(file) %>"
-        data-uris="<%= file.uri_cache %>"
-        data-rich-asset-id="<%= file.id %>"
-				data-rich-asset-type="<%= file.simplified_type %>"
-				data-rich-asset-name="<%= file.filename %>"
-        data-rich-asset-parent="<%= file.parent_id %>"
+        data-uris="<%= file.id %>"
+        data-rich-asset-id="<%= blob.id %>"
+				data-rich-asset-type="<%= blob.content_type %>"
+				data-rich-asset-name="<%= blob.filename %>"
+        data-rich-asset-parent="<%= file.id %>"
   />
   <p  id="<%= file.id %>"
       data-update-url="<%= file_path(file) %>"
       data-input-placeholder="<%= t('filename_update_input_placeholder') %>"
       title="<%= t('filename_update_hover_hint') %>">
-    <%= file.filename %>
+    <%= blob.filename %>
   </p>
 
-  <%
+  <%#
       confirm_message = nil
       file.simplified_type == 'folder' ? confirm_message = :delete_confirm_folder : confirm_message = :delete_confirm
   %>
 
-  <% unless file.id == -1 || file.parent_id == -1 %>
-    <%= link_to "delete", "/rich/files/"+file.id.to_s, :method => :delete, :remote => true, :data => { :confirm => t(confirm_message) }, :class => "delete", :title => t(:delete) %>
-  <% end %>
+  <%# unless file.id == -1 || file.parent_id == -1 %>
+    <%#= link_to "delete", "/rich/files/"+file.id.to_s, :method => :delete, :remote => true, :data => { :confirm => t(confirm_message) }, :class => "delete", :title => t(:delete) %>
+  <%# end %>
 </li>

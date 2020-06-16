@@ -35,10 +35,11 @@
 
 </header>
 
-<div id="legacy-form"><%= form_for(@rich_asset, :url => files_path) do |f| %>
-  <p><%= f.file_field :rich_file%></p>
-  <%= f.submit("Upload") %>
-<% end %>
+<div id="legacy-form">
+  <%= form_for(@rich_asset, :url => { action: 'create'} ) do |f| %>
+    <p><%= f.file_field :rich_file %></p>
+    <%= f.submit("Upload") %>
+  <% end %>
 </div>
 
 <ul id="items">
@@ -49,15 +50,16 @@
     </div>
     <p><%= t(:upload_a_file) %></p>
   </li>
+  <% unless @items.empty? %>
+    <%
+      # sort folders first and then files
+      #@folders = @items.where(simplified_type: 'folder')
+      #@files = @items.where.not(simplified_type: 'folder')
+    %>
 
-  <%
-    # sort folders first and then files
-    @folders = @items.where(simplified_type: 'folder')
-    @files = @items.where.not(simplified_type: 'folder')
-  %>
-
-  <!-- render files and folders separately -->
-	<%= render :partial => "file", :collection => @folders, :as => :file %>
-  <%= render :partial => "file", :collection => @files, :as => :file %>
+    <!-- render files and folders separately -->
+    <%= render :partial => "file", :collection => @items, :as => :file %>
+    <%#= render :partial => "file", :collection => @files, :as => :file %>
+  <% end %>
 
 </ul>

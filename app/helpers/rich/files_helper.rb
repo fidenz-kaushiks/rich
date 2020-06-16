@@ -1,11 +1,17 @@
 module Rich
   module FilesHelper
+    include Rails.application.routes.url_helpers
 
     def thumb_for_file(file)
-      if file.simplified_type == "image" || file.rich_file_content_type.to_s["image"]
-        file.rich_file.url(:rich_thumb)
+      if file.image?
+        rails_representation_url(file.variant(combine_options: {
+          auto_orient: true,
+          gravity: "center",
+          resize: "100x100^",
+          crop: "100x100+0+0"
+        }).processed, only_path: true).remove("/rich")
       else
-        case file.rich_file_content_type
+        case file.blob.content_type
         when 'application/pdf'
           asset_path 'icons/icon-pdf.png'
         when 'application/msword'
