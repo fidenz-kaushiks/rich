@@ -19,7 +19,7 @@ rich.AssetPicker.prototype = {
 		params.scoped = options.scoped || false;
 		params.alpha = options.alpha || true;
 		params.file_type = options.file_type || false;
-		params.parent_id = options.parent_id || 0;
+		params.parent_id = options.parent_id || 1;
 		params.folder_level = options.folder_level;
 		if(params.scoped == true) {
 			params.scope_type = options.scope_type

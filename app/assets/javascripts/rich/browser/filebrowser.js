@@ -294,6 +294,7 @@ rich.Browser.prototype = {
         type: 'PUT',
         data: { filename: newFilename, id: fileId },
         success: function(data) {
+          console.log(data.filename);
           form.siblings('p').text(data.filename);
           form.siblings('img').attr('data-uris', data.uris);
         },
