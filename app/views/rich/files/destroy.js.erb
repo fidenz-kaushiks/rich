@@ -1,7 +1,11 @@
-<% if !@fileid.nil? %>
-	$("#file<%= @fileid %>").parent().remove();
+<% if @item_id.nil? == false %>
+	<% if @is_file_item %>
+	  $("#file<%= @item_id %>").parent().remove();
+  <% else %>
+    $("#folder<%= @item_id %>").parent().remove();
+  <% end %>
 <% elsif !@error.nil? %>
 	alert("<%= @error %>");
 <% else %>
-	//
+	alert("<%= @error %>");
 <% end %>

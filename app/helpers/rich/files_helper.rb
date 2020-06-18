@@ -1,13 +1,14 @@
 module Rich
   module FilesHelper
 
-    def thumb_for_file(file)
-      if file.image?
-        get_image_url(file)
+    def thumb_for_file(item)
+      if item.class.name == 'Rich::StorageFolder'
+        image_path 'icons/icon-empty.png'
+      elsif item.image?
+        get_image_url(item)
       else
-        case file.blob.content_type
+        case item.blob.content_type
         when 'application/pdf'
-          byebug
           image_path 'icons/icon-pdf.png'
         when 'application/msword'
           image_path 'icons/icon-doc.png'

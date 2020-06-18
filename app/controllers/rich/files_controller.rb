@@ -11,11 +11,28 @@ module Rich
     PARENT_FOLDER_ID = 1
 
     def index
-      parent_id = params[:parent_id].nil? ? PARENT_FOLDER_ID : params[:parent_id].to_i
-      folder    = StorageFolder.find_by(id: parent_id)
+      @parent_id = params[:parent_id].nil? ? PARENT_FOLDER_ID : params[:parent_id].to_i
+      folder     = StorageFolder.find_by(id: @parent_id)
+      @items     = []
 
-      @items       = folder ? folder.files.all : []
+      if folder
+        files   = folder.files.all
+        folders = folder.children
+        if params[:alpha] == 'true'
+          files   = files.sort_by {|file| file.blob.filename}
+          folders = folders.sort_by {|folder| folder.folder_name}
+        end
+
+        unless params[:search].blank?
+          files   = files.select { |file| file.blob.filename.to_s.include?(params[:search]) }
+          folders = folders.select { |folder| folder.folder_name.include?(params[:search]) }
+        end
+
+        @items  = [files] + [folders]
+      end
+
       @rich_asset  = RichFile.new
+
       current_page = params[:page].to_i
       respond_to do |format|
         format.html
@@ -26,11 +43,10 @@ module Rich
     def show
       # show is used to retrieve single files through XHR requests after a file has been uploaded
       if params[:id]
-        # list all files
         @file = @rich_file
-        render :layout => false
+        render layout: false
       else
-        render :text => "File not found"
+        render text: "File not found"
       end
     end
 
@@ -39,41 +55,53 @@ module Rich
       if params[:current_level].to_i > Rich.options[:folder_level] && params[:simplified_type] == 'folder'
         return
       end
+      is_file   = false
+      is_folder = false
+      parent_id = params[:parent_id].nil? ? PARENT_FOLDER_ID : params[:parent_id].to_i
 
-      if params[:simplified_type] == 'folder'
-        StorageFolder.create(folder_name: 'new-folder', parent_id: PARENT_FOLDER_ID)
-      else
-        folder = StorageFolder.first
-        file_params = params[:file] || params[:qqfile]
-        file = folder.files.attach(file_params)
+      begin
+        if params[:simplified_type] == 'folder'
+          item      = StorageFolder.create(folder_name: 'new-folder', parent_id: parent_id)
+          is_folder = true
+        else
+          folder = StorageFolder.find_by(id: parent_id)
+          file_params = params[:file] || params[:qqfile]
+          is_file = folder.files.attach(file_params)
+          item    = folder.files.reload.last
+        end
+
+        if is_file || is_folder
+          response = {  success: true,
+                        rich_id: item.id,
+                        parent_id: parent_id,
+                        file_path: thumb_for_file(item),
+                        is_file: is_file }
+        else
+          response = {  success: false,
+                        error: "Could not upload your file:\n- "+ file.errors.to_a[-1].to_s,
+                        params: params.inspect }
+        end
+      rescue => ex
+        response = {  success: false,
+                      error: "Could not upload your file:\n- " + ex.message.to_s,
+                      params: params.inspect }
       end
 
-      @file = folder.files.reload.last
-      if file
-        response = {  :success => true,
-                      :rich_id => @file.id,
-                      :parent_id => folder.id,
-                      :file_path => thumb_for_file(@file)
-                    }
-      else
-        response = { :success => false,
-                     :error => "Could not upload your file:\n- "+file.errors.to_a[-1].to_s,
-                     :params => params.inspect }
-      end
-      render :json => response, :content_type => "text/html"
-
+      render json: response, content_type: "text/html"
     end
 
-
-
     def update
-    # self.active_storage_object.blob.update(filename: "desired_filename.#{self.active_storage_object.filename.extension}")
-
       new_filename_without_extension = params[:filename].parameterize
       if new_filename_without_extension.present?
-        filename = "#{new_filename_without_extension}.#{@rich_file.blob.filename.extension}"
-        udpate   = @rich_file.blob.update(filename: filename)
-        render :json => { :success => true, :filename => filename, :uris => @rich_file.id }
+        if is_file?
+          filename = "#{new_filename_without_extension}.#{@rich_file.blob.filename.extension}"
+          udpate   = @rich_file.blob.update(filename: filename)
+        else
+          filename = new_filename_without_extension
+          udpate   = @folder.update(folder_name: filename)
+        end
+
+        render :json => { :success => true, :filename => filename, :uris => @rich_file.try(:id) || @folder.try(:id) }
       else
         render :nothing => true, :status => 500
       end
@@ -81,18 +109,14 @@ module Rich
 
     def destroy
       if(params[:id])
+        item = @rich_file || @folder
         begin
-          @rich_file.destroy
-          @fileid = params[:id]
+          @is_file_item = item.class.name != "Rich::StorageFolder"
+          item.destroy
+          @item_id = params[:id]
         rescue Exception => e
           @error = 'sorry cannot delete'
         end
-        # if @rich_file.destroy!
-        #   @fileid = params[:id]
-        # else
-        #   response = {  :success => false,
-        #                 :error => 'cannot delete' }
-        # end
       end
     end
 
@@ -130,8 +154,16 @@ module Rich
     private
     # Use callbacks to share common setup or constraints between actions.
     def set_rich_file
-      folder = StorageFolder.first
-      @rich_file = folder.files.find_by(id: params[:id])
+      if is_file?
+        folder     = StorageFolder.find_by(id: params[:parent_id])
+        @rich_file = folder.files.find_by(id: params[:id])
+      else
+        @folder = StorageFolder.find_by(id: params[:id])
+      end
+    end
+
+    def is_file?
+      params[:type] == 'file'
     end
   end
 end

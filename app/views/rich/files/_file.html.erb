@@ -9,18 +9,11 @@
         data-rich-asset-parent="<%= file.id %>"
   />
   <p  id="<%= file.id %>"
-      data-update-url="<%= file_path(file) %>"
+      data-update-url="<%= file_path(file, type: 'file', parent_id: @parent_id.to_s) %>"
       data-input-placeholder="<%= t('filename_update_input_placeholder') %>"
       title="<%= t('filename_update_hover_hint') %>">
     <%= blob.filename %>
   </p>
 
-  <%#
-      confirm_message = nil
-      file.simplified_type == 'folder' ? confirm_message = :delete_confirm_folder : confirm_message = :delete_confirm
-  %>
-
-  <%# unless file.id == -1 || file.parent_id == -1 %>
-    <%= link_to "delete", "/rich/files/"+file.id.to_s, :method => :delete, :remote => true, :data => { :confirm => t(:delete_confirm) }, :class => "delete", :title => t(:delete) %>
-  <%# end %>
+  <%= link_to "delete", "/rich/files/"+file.id.to_s+"?type=file&parent_id="+@parent_id.to_s, :method => :delete, :remote => true, :data => { :confirm => t(:delete_confirm) }, :class => "delete", :title => t(:delete) %>
 </li>

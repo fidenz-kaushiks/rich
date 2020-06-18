@@ -22,7 +22,7 @@ rich.Uploader = function(parentId){
 		maxConnections: 3,
 		action: $("#new_rich_file").attr("action"),
 		params: { authenticity_token: $("input[name='authenticity_token']").attr("value"),
-		 	      simplified_type: this._options.uploadType,
+					simplified_type: this._options.uploadType,
 				  scoped: this._options.scoped,
 				  scope_type: this._options.scope_type,
 				  scope_id: this._options.scope_id,
@@ -42,14 +42,15 @@ rich.Uploader.prototype = {
 			$('#up'+id+' .progress-bar').first().width("100%");
 			$('#up'+id+' .spinner').first().addClass("spinning");
 			//get the created image object's id from the response and use it to request the thumbnail
-			$.get("/rich/files/"+response.rich_id, function(data) {
+			item_type = response.is_file ? "file" : "folder"
+			$.get("/rich/files/"+response.rich_id+"?type="+item_type+"&parent_id="+response.parent_id, function(data) {
 				$('#up'+id).replaceWith(data).addClass("test");
 				$('#image'+response.rich_id).addClass("new");
 			});
     } else {
 				$('#up'+id+' .spinner').first().addClass("error");
 				$('#up'+id+' .spinner').first().removeClass("spinning");
-                $('#up'+id+' .progress-bar').first().remove();
+				$('#up'+id+' .progress-bar').first().remove();
     }
   },
 

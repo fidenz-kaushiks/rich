@@ -1,19 +1,16 @@
-// sort search result
 <% unless @search %>
 
-	// first folders and then files
-	<%	@folders = @items.where(simplified_type: 'folder') %>
-	<%	@files = @items.where.not(simplified_type: 'folder') %>
+	<%	@files   = @items[0] %>
+	<%	@folders = @items[1] %>
 
-	<%	if @items.where(simplified_type: 'folder').count > 0 %>
-		$("#items").append("<%= escape_javascript(render :partial => "file", :collection => @folders, :as => :file) %>");
+	<%	if @folders.count > 0 %>
+		$("#items").append("<%= escape_javascript(render :partial => "folder", :collection => @folders, :as => :folder) %>");
 	<% 	end %>
 
-	<% 	if @items.where.not(simplified_type: 'folder').count > 0 %>
+	<% 	if @files.count > 0 %>
 		$("#items").append("<%= escape_javascript(render :partial => "file", :collection => @files, :as => :file) %>");
 	<% end	%>
 
-// if not search
 <% else %>
 
 	<% unless @items.nil? %>

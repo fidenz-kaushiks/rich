@@ -1,0 +1,17 @@
+<li class="" id="<%= folder.id %>">
+  <img  id="folder<%= folder.id %>"
+        src="<%= thumb_for_file(folder) %>"
+        data-uris="<%= folder.id %>"
+        data-rich-asset-id="<%= folder.id %>"
+				data-rich-asset-type="<%= 'folder' %>"
+				data-rich-asset-name="<%= folder.folder_name %>"
+        data-rich-asset-parent="<%= folder.parent.try(:id) %>"
+  />
+  <p  id="<%= folder.id %>"
+      data-update-url="<%= file_path(folder, type: 'folder', parent_id: @parent_id.to_s) %>"
+      data-input-placeholder="<%= t('filename_update_input_placeholder') %>"
+      title="<%= t('filename_update_hover_hint') %>">
+    <%= folder.folder_name %>
+  </p>
+  <%= link_to "delete", "/rich/files/"+folder.id.to_s+"?type=folder", :method => :delete, :remote => true, :data => { :confirm => t(:delete_confirm_folder) }, :class => "delete", :title => t(:delete) %>
+</li>

@@ -28,7 +28,7 @@ rich.Browser = function(){
     file_name: 'untitle',
     // current level only to validate
     current_level: 0,
-    parent_id: 0,
+    parent_id: 1,
   };
 };
 
@@ -141,7 +141,7 @@ rich.Browser.prototype = {
 
 	selectItem: function(item) {
 		var url = $(item).data('uris')[this._options.currentStyle];
-		var id = $(item).data('rich-asset-id');
+		var id  = $(item).data('rich-asset-id');
 		var type = $(item).data('rich-asset-type');
 		var name = $(item).data('rich-asset-name');
     var parent = $(item).data('rich-asset-parent');
@@ -152,6 +152,7 @@ rich.Browser.prototype = {
     if (type == 'folder') {
       this.showLoadingIconAndRefreshList();
       // get items inside the folder
+
       $.ajax({
         url: this.updateUrlParameter(self.urlWithParams(),id),
         type: 'get',
