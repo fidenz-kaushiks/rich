@@ -42,7 +42,7 @@ module Rich
     
     def show
       # show is used to retrieve single files through XHR requests after a file has been uploaded
-      @parent_id = params[:parent_id].nil? ? PARENT_FOLDER_ID : params[:parent_id].to_i
+      # @parent_id = params[:parent_id].nil? ? PARENT_FOLDER_ID : params[:parent_id].to_i
       if params[:id]
         @file = @rich_file
         render layout: false
