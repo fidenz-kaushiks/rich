@@ -53,7 +53,7 @@ module Rich
 
     def create
       # validate folder level at folder creation
-      if params[:current_level].to_i > Rich.options[:folder_level] && params[:simplified_type] == 'folder'
+      if (params[:current_level].to_i + 1) > (Rich.options[:folder_level]) && params[:simplified_type] == 'folder'
         return
       end
       is_file   = false
