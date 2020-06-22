@@ -1,20 +1,22 @@
-<% unless @search %>
+<% unless @items[0].empty? && @items[1].empty? %>
+	<% unless @search %>
 
-	<%	@files   = @items[0] %>
-	<%	@folders = @items[1] %>
+		<%	@files   = @items[0] %>
+		<%	@folders = @items[1] %>
 
-	<%	if @folders.count > 0 %>
-		$("#items").append("<%= escape_javascript(render :partial => "folder", :collection => @folders, :as => :folder) %>");
-	<% 	end %>
+		<%	if @folders.count > 0 %>
+			$("#items").append("<%= escape_javascript(render :partial => "folder", :collection => @folders, :as => :folder) %>");
+		<% 	end %>
 
-	<% 	if @files.count > 0 %>
-		$("#items").append("<%= escape_javascript(render :partial => "file", :collection => @files, :as => :file) %>");
-	<% end	%>
+		<% 	if @files.count > 0 %>
+			$("#items").append("<%= escape_javascript(render :partial => "file", :collection => @files, :as => :file) %>");
+		<% end	%>
 
-<% else %>
+	<% else %>
 
-	<% unless @items.nil? %>
-		$("#items").append("<%= escape_javascript(render :partial => "file", :collection => @items, :as => :file) %>");
+		<% unless @items.nil? %>
+			$("#items").append("<%= escape_javascript(render :partial => "file", :collection => @items, :as => :file) %>");
+		<% end %>
+
 	<% end %>
-
 <% end %>

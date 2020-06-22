@@ -52,7 +52,8 @@
     </div>
     <p><%= t(:upload_a_file) %></p>
   </li>
-  <% unless @items.empty? %>
+  <% unless @items[0].empty? && @items[1].empty? %>
+
     <%
       # sort folders first and then files
       @files   = @items[0]

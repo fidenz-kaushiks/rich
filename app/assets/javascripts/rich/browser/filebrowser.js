@@ -197,7 +197,7 @@ rich.Browser.prototype = {
   // back button function
   goBack: function () {
     // validate at root end
-    this._folder.parent_id = this._options.previousParent != 1 ? this._options.previousParent.pop() : 1;
+    this._folder.parent_id = this._options.previousParent.length != 0 ? this._options.previousParent.pop() : 1;
 
     this.showLoadingIconAndRefreshList();
     var self = this;
