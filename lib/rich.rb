@@ -112,6 +112,9 @@ module Rich
   mattr_accessor :paginates_per
   @@paginates_per = 34
 
+  mattr_accessor :use_active_storage
+  @@use_active_storage = true
+
   def self.options(overrides={}, scope_type=nil, scope_id=nil)
     # merge in editor settings configured elsewhere
 
@@ -132,7 +135,8 @@ module Rich
       :preview_size => self.preview_size,
       :hidden_input => self.hidden_input,
       :paginates_per => self.paginates_per,
-      :folder_level => self.folder_level
+      :folder_level => self.folder_level,
+      :use_active_storage => self.use_active_storage
     }
     editor_options = self.editor.merge(base)
 
