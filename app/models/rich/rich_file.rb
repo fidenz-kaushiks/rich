@@ -7,19 +7,6 @@ module Rich
 		include Backends::Paperclip
 
 		belongs_to :storage_folder
-
-		scope :images, -> (id) { where("simplified_type in (?)",['image']).where(parent_id: id) }
-		scope :videos, -> (id) { where("simplified_type in (?)",['video']).where(parent_id: id) }
-		scope :files, -> (id) { where("simplified_type in (?)",['file']).where(parent_id: id ) }
-		scope :audios, -> (id) { where("simplified_type in (?)",['audio']).where(parent_id: id) }
-		scope :any, -> (id) { where(parent_id: id) }
-
-		# scope :images, -> (id) { where("simplified_type in (?)",['image', 'folder']).where(parent_id: id) }
-		# scope :videos, -> (id) { where("simplified_type in (?)",['video', 'folder']).where(parent_id: id) }
-		# scope :files, -> (id) { where("simplified_type in (?)",['file', 'folder']).where(parent_id: id ) }
-		# scope :audios, -> (id) { where("simplified_type in (?)",['audio', 'folder']).where(parent_id: id) }
-		# scope :any, -> (id) { where(parent_id: id) }
-
 		paginates_per Rich.options[:paginates_per]
 
 		def blob

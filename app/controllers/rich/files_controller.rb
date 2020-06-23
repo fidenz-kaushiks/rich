@@ -14,10 +14,21 @@ module Rich
       @parent_id = params[:parent_id].nil? ? PARENT_FOLDER_ID : params[:parent_id].to_i
       folder     = StorageFolder.find_by(id: @parent_id)
       @items     = []
+      type      = params[:type]
 
       if folder
         files   = folder.files.all
         folders = folder.children
+
+        case type
+        when 'image'
+          files   = files.select {|file| file.image? }
+        when 'file'
+          files   = files.reject {|file| file.image? }
+        else
+          #default
+        end
+
         if params[:alpha] == 'true'
           files   = files.sort_by {|file| file.blob.filename}
           folders = folders.sort_by {|folder| folder.folder_name}
