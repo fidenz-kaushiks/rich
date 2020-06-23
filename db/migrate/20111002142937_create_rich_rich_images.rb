@@ -8,7 +8,7 @@ class CreateRichRichImages < ActiveRecord::Migration[5.2]
       t.datetime :rich_file_updated_at
       t.text :uri_cache
       t.string :simplified_type, :default => "file"
-      t.integer :parent_id, :default => 0
+      t.integer :storage_folder_id, :default => 0
 
       t.timestamps
     end

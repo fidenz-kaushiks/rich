@@ -5,7 +5,11 @@ module Rich
       if item.class.name == 'Rich::StorageFolder'
         image_path 'icons/icon-empty.png'
       elsif item.image?
-        get_image_url(item)
+        if item.class.name == 'Rich::RichFile'
+          item.rich_file.url(:rich_thumb)
+        else
+          get_image_url(item)
+        end
       else
         case item.blob.content_type
         when 'application/pdf'

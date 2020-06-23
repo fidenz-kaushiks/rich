@@ -67,8 +67,8 @@ module Rich
         else
           folder = StorageFolder.find_by(id: parent_id)
           file_params = params[:file] || params[:qqfile]
-          is_file = folder.files.attach(file_params)
-          item    = folder.files.reload.last
+          is_file = folder.attach(file_params)
+          item    = folder.files.reload.order(:id).last
         end
 
         if is_file || is_folder
@@ -96,7 +96,7 @@ module Rich
       new_filename_without_extension = params[:filename].parameterize
       if new_filename_without_extension.present?
         if is_file?
-          filename = "#{new_filename_without_extension}.#{@rich_file.blob.filename.extension}"
+          filename = "#{new_filename_without_extension}.#{@rich_file.blob.filename.to_s.split('.')[1]}"
           udpate   = @rich_file.blob.update(filename: filename)
         else
           filename = new_filename_without_extension
