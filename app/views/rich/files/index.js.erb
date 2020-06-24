@@ -1,8 +1,10 @@
 <% unless @items[0].empty? && @items[1].empty? %>
 	<% unless @search %>
 
-		<%	@files   = @items[0] %>
-		<%	@folders = @items[1] %>
+		<%
+			@folders = @items[0]
+			@files   = @items[1]
+		%>
 
 		<%	if @folders.count > 0 %>
 			$("#items").append("<%= escape_javascript(render :partial => "folder", :collection => @folders, :as => :folder) %>");

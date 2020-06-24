@@ -14,17 +14,20 @@ module Rich
       @parent_id = params[:parent_id].nil? ? PARENT_FOLDER_ID : params[:parent_id].to_i
       folder     = StorageFolder.find_by(id: @parent_id)
       @items     = []
-      type      = params[:type]
+      type       = params[:type]
+
+      per_page     = Rich.options[:paginates_per]
+      current_page = (params[:page] || 1).to_i
 
       if folder
-        files   = folder.files.all
-        folders = folder.children
+        files   = folder.files.all.order(:created_at)
+        folders = folder.children.order(:created_at)
 
         case type
         when 'image'
-          files   = files.select {|file| file.image? }
+          files = files.select {|file| file.image? }
         when 'file'
-          files   = files.reject {|file| file.image? }
+          files = files.reject {|file| file.image? }
         else
           #default
         end
@@ -39,10 +42,21 @@ module Rich
           folders = folders.select { |folder| folder.folder_name.include?(params[:search]) }
         end
 
-        @items  = [files] + [folders]
+        start_point = (current_page - 1) * per_page
+        end_point   = (current_page) * per_page
+
+        @items = ([folders] + [files]).flatten
+        @items = @items[start_point, end_point]
+
+        unless @items.nil?
+          @items = @items.partition { |item| item.class.name == "Rich::StorageFolder" }
+          @items = [@items[0]] + [@items[1]]
+        else
+          @items = [[],[]]
+        end
       end
 
-      @rich_asset  = RichFile.new
+      @rich_asset = RichFile.new
 
       current_page = params[:page].to_i
       respond_to do |format|
@@ -50,7 +64,7 @@ module Rich
         format.js
       end
     end
-    
+
     def show
       # show is used to retrieve single files through XHR requests after a file has been uploaded
       # @parent_id = params[:parent_id].nil? ? PARENT_FOLDER_ID : params[:parent_id].to_i
