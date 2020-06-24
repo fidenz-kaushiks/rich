@@ -3,7 +3,7 @@ module Rich
 
     def thumb_for_file(item)
       if item.class.name == 'Rich::StorageFolder'
-        image_path 'icons/icon-empty.png'
+        get_icon_url 'icons/icon-empty.png'
       elsif item.image?
         if item.class.name == 'Rich::RichFile'
           item.rich_file.url(:rich_thumb)
@@ -13,39 +13,39 @@ module Rich
       else
         case item.blob.content_type
         when 'application/pdf'
-          image_path 'icons/icon-pdf.png'
+          get_icon_url 'icons/icon-pdf.png'
         when 'application/msword'
-          image_path 'icons/icon-doc.png'
+          get_icon_url 'icons/icon-doc.png'
         when 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-          image_path 'icons/icon-docx.png'
+          get_icon_url 'icons/icon-docx.png'
         when 'text/html'
-          image_path 'icons/icon-html.png'
+          get_icon_url 'icons/icon-html.png'
         when 'text/css'
-          image_path 'icons/icon-css.png'
+          get_icon_url 'icons/icon-css.png'
         when 'video/x-msvideo'
-          image_path 'icons/icon-avi.png'
+          get_icon_url 'icons/icon-avi.png'
         when 'audio/mpeg3' || 'audio/x-mpeg-3' || 'audio/mpeg'
-          image_path 'icons/icon-mp3.png'
+          get_icon_url 'icons/icon-mp3.png'
         when 'application/zip'
-          image_path 'icons/icon-zip.png'
+          get_icon_url 'icons/icon-zip.png'
         when 'text/csv'
-          image_path 'icons/icon-csv.png'
+          get_icon_url 'icons/icon-csv.png'
         when 'image/vnd.adobe.photoshop'
-          image_path 'icons/icon-psd.png'
+          get_icon_url 'icons/icon-psd.png'
         when 'application/vnd.ms-excel' || 'application/vnd.ms-excel.sheet.binary.macroenabled.12' || ' application/vnd.ms-excel.sheet.macroenabled.12' || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-          image_path 'icons/icon-xls.png'
+          get_icon_url 'icons/icon-xls.png'
         when 'application/vnd.openxmlformats-officedocument.presentationml.presentation' || 'application/vnd.ms-powerpoint' || 'application/vnd.ms-powerpoint.presentation.macroenabled.12'
-          image_path 'icons/icon-ppt.png'
+          get_icon_url 'icons/icon-ppt.png'
         when 'application/x-rar-compressed'
-          image_path 'icons/icon-rar.png'
+          get_icon_url 'icons/icon-rar.png'
         when 'text/plain'
-          image_path 'icons/icon-txt.png'
+          get_icon_url 'icons/icon-txt.png'
         when 'video/mp4' || 'application/mp4' || 'audio/mp4'
-          image_path 'icons/icon-mp4.png'
+          get_icon_url 'icons/icon-mp4.png'
         when 'folder'
-          image_path 'icons/icon-empty.png'
+          get_icon_url 'icons/icon-empty.png'
         else
-          image_path 'icons/icon-unknown.png'
+          get_icon_url 'icons/icon-unknown.png'
         end
       end
     end
@@ -59,6 +59,10 @@ module Rich
           resize: "100x100^",
           crop: "100x100+0+0"
         }).processed, only_path: true).remove("/rich")
+    end
+
+    def get_icon_url(icon)
+      ActionController::Base.helpers.asset_path(icon)
     end
   end
 end
