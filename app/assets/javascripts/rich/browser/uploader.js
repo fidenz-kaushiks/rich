@@ -1,48 +1,63 @@
 // Implementation of the QQ FileUploader class for use in Rich
 
 var rich = rich || {};
+var uploader = false;
 
-rich.Uploader = function(parentId){
-	
+rich.Uploader = function(folder_id){
 	this._options = {
 		uploadButtonId: 'upload',
 		insertionPoint: 'uploadBlock',
 		uploadType: $.QueryString["type"],
 		scoped: $.QueryString["scoped"],
 		scope_type: $.QueryString["scope_type"],
-		scope_id: $.QueryString["scope_id"],
-		parent_id: parentId
+		scope_id: $.QueryString["scope_id"]
 	};
 	
 	// create the qq uploader
 	var self = this;
-	var uploader = new qq.FileUploaderBasic({
-	  button: document.getElementById(self._options.uploadButtonId),
-		multiple: true,
-		maxConnections: 3,
-		action: $("#new_rich_file").attr("action"),
-		params: { authenticity_token: $("input[name='authenticity_token']").attr("value"),
-					simplified_type: this._options.uploadType,
-				  scoped: this._options.scoped,
-				  scope_type: this._options.scope_type,
-				  scope_id: this._options.scope_id,
-				  parent_id: parentId
-		},
-		debug: true,
-		onComplete: function(id, fileName, responseJSON) { self.uploadComplete(id, fileName, responseJSON); },
-		onSubmit: function(id, fileName) { self.uploadSubmit(id, fileName); },
-		onProgress: function(id, fileName, loaded, total) { self.uploadProgress(id, fileName, Math.round(loaded/total*100)); }
-	});
+	var parent_folder_id = folder_id;
+
+	if (!uploader){
+		uploader = new qq.FileUploaderBasic({
+			button: document.getElementById(self._options.uploadButtonId),
+			  multiple: true,
+			  maxConnections: 3,
+			  action: $("#new_rich_file").attr("action"),
+			  params: {
+				authenticity_token: $("input[name='authenticity_token']").attr("value"),
+				simplified_type: this._options.uploadType,
+				scoped: this._options.scoped,
+				scope_type: this._options.scope_type,
+				scope_id: this._options.scope_id,
+				parent_id: parent_folder_id
+			  },
+			  debug: true,
+			  onComplete: function(id, fileName, responseJSON) { self.uploadComplete(id, fileName, responseJSON); },
+			  onSubmit: function(id, fileName) { self.uploadSubmit(id, fileName); },
+			  onProgress: function(id, fileName, loaded, total) { self.uploadProgress(id, fileName, Math.round(loaded/total*100)); }
+		  });
+	} else {
+		uploader.setParams({
+			authenticity_token: $("input[name='authenticity_token']").attr("value"),
+			simplified_type: this._options.uploadType,
+			scoped: this._options.scoped,
+			scope_type: this._options.scope_type,
+			scope_id: this._options.scope_id,
+			parent_id: parent_folder_id
+		});
+	}
 };
 
 rich.Uploader.prototype = {
 
 	uploadComplete: function(id, fileName, response){
+		console.log(response);
 		if (response.success){
 			$('#up'+id+' .progress-bar').first().width("100%");
 			$('#up'+id+' .spinner').first().addClass("spinning");
 			//get the created image object's id from the response and use it to request the thumbnail
 			item_type = response.is_file ? "file" : "folder"
+			console.log(response.parent_id);
 			$.get("/rich/files/"+response.rich_id+"?type="+item_type+"&parent_id="+response.parent_id, function(data) {
 				$('#up'+id).replaceWith(data).addClass("test");
 				$('#image'+response.rich_id).addClass("new");

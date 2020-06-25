@@ -41,8 +41,7 @@ rich.Browser.prototype = {
 		// initialize image insertion mode
 		this._options.insertionModeMany = ($.QueryString["insert_many"]=="true")?true:false;
 		this.toggleInsertionMode(false);
-    	this.toggleViewMode(false);
-    // this._options.sortAlphabetically = ($.QueryString["alpha"]=="true")?true:false;
+    this.toggleViewMode(false);
     if ($.QueryString["alpha"]=="true") {
       this._options.sortAlphabetically = false;
       $('#sort-by-date').show();
@@ -72,7 +71,6 @@ rich.Browser.prototype = {
 		this._options.loading = loading;
 
 		if(loading == true) {
-			// $('#loading').css({visibility: 'visible'});
 			$('#loading').fadeIn();
 		} else {
 			$('#loading').fadeOut();
@@ -147,8 +145,6 @@ rich.Browser.prototype = {
     var parent = $(item).data('rich-asset-parent');
     var self = this;
 
-		// if($.QueryString["CKEditor"]=='picker') {
-      // if selection is a folder
     if (type == 'folder') {
       this.showLoadingIconAndRefreshList();
       // get items inside the folder
@@ -163,34 +159,13 @@ rich.Browser.prototype = {
           // change folders' parent and its' level
           self._folder.parent_id = id;
           self._folder.current_level++;
-          console.log(self._folder.parent_id);
         }
       });
     } else {
       if($.QueryString["CKEditor"]=='picker') {
         window.opener.assetPicker.setAsset($.QueryString["dom_id"], url, id, type);
       }
-
-      console.log('1 ' + $.QueryString["CKEditorFuncNum"]);
-      console.log('2 ' + url);
-      console.log('3 ' + id);
-      console.log('4 ' + name);
-
       window.opener.CKEDITOR.tools.callFunction($.QueryString["CKEditorFuncNum"], url, id, name);
-    }
-		// } else {
-		// 	window.opener.CKEDITOR.tools.callFunction($.QueryString["CKEditorFuncNum"], url, id, name);
-		// }
-
-    if (type != 'folder') {
-      // wait a short while before closing the window or regaining focus
-      // window.setTimeout(function(){
-      //   if(self._options.insertionModeMany == false) {
-      //     window.close();
-      //   } else {
-      //     window.focus();
-      //   }
-      // },100);
     }
 	},
 
@@ -295,7 +270,6 @@ rich.Browser.prototype = {
         type: 'PUT',
         data: { filename: newFilename, id: fileId },
         success: function(data) {
-          console.log(data.filename);
           form.siblings('p').text(data.filename);
           form.siblings('img').attr('data-uris', data.uris);
         },
@@ -351,7 +325,6 @@ rich.Browser.prototype = {
 
   // to parse parent to rich 'Uploader'
   returnParentId: function () {
-    // console.log(this._folder.parent_id);
     return this._folder.parent_id;
   }
 };
@@ -365,7 +338,6 @@ $(function(){
 	browser.initialize();
 
   $('#upload').on('click',function (e) {
-    console.log('from onclick: '+browser.returnParentId());
     new rich.Uploader(browser.returnParentId());
   });
 
@@ -429,8 +401,7 @@ $(function(){
 
   // back button
   $('#back-link').on('click',function (e) {
-    // console.log(browser.returnParentId());
-    if (browser.returnParentId() != 0) {
+    if (browser.returnParentId() != 1) {
       browser.goBack();
     }
   });
