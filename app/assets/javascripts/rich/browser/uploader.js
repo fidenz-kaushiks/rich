@@ -51,13 +51,11 @@ rich.Uploader = function(folder_id){
 rich.Uploader.prototype = {
 
 	uploadComplete: function(id, fileName, response){
-		console.log(response);
 		if (response.success){
 			$('#up'+id+' .progress-bar').first().width("100%");
 			$('#up'+id+' .spinner').first().addClass("spinning");
 			//get the created image object's id from the response and use it to request the thumbnail
 			item_type = response.is_file ? "file" : "folder"
-			console.log(response.parent_id);
 			$.get("/rich/files/"+response.rich_id+"?type="+item_type+"&parent_id="+response.parent_id, function(data) {
 				$('#up'+id).replaceWith(data).addClass("test");
 				$('#image'+response.rich_id).addClass("new");
