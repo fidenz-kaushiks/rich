@@ -38,8 +38,10 @@ module Rich
         end
 
         unless params[:search].blank?
-          files   = files.select { |file| file.blob.filename.to_s.include?(params[:search]) }
-          folders = folders.select { |folder| folder.folder_name.include?(params[:search]) }
+          all_folders = StorageFolder.all
+
+          files   = all_folders.map(&:files).flatten.select { |file| file.blob.filename.to_s.include?(params[:search]) }
+          folders = all_folders.select { |folder| folder.folder_name.include?(params[:search]) }
         end
 
         start_point = (current_page - 1) * per_page
@@ -178,6 +180,11 @@ module Rich
       end
     end
 
+    def parent_list
+      folder_array = get_parent(params[:parent_id].to_i, [1]).sort
+      render :json => { :success => true, :folder_array => folder_array }
+    end
+
     private
     # Use callbacks to share common setup or constraints between actions.
     def set_rich_file
@@ -191,6 +198,16 @@ module Rich
 
     def is_file?
       params[:type] == 'file'
+    end
+
+    def get_parent(id, array)
+      if id == 1
+        return array
+      else
+        folder = StorageFolder.find_by(id: id)
+        array.insert(0, folder.parent.id)
+        get_parent(folder.parent.id, array)
+      end
     end
   end
 end

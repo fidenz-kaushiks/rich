@@ -209,12 +209,10 @@ module Rich
     elsif simplified_type == 'audio'
       if allowed_audio_types.include?(mime)
         true
-      end  
-    elsif simplified_type == "file"
-      # other types; not (images, videos, audios)
-      if (allowed_image_types + allowed_video_types + allowed_audio_types).exclude?(mime)
-        true
       end
+    elsif simplified_type == "file" || simplified_type == "any"
+      #any type
+      true
     else
       if allowed_document_types == :all
         true

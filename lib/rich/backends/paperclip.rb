@@ -8,7 +8,7 @@ module Rich
       included do
         has_attached_file :rich_file,
                           styles: proc { |a| a.instance.set_styles },
-                          convert_options: proc { |a| Rich.convert_options[a] }
+                          convert_options: proc { |a| Rich.convert_options[a] }, validate_media_type: false
         do_not_validate_attachment_file_type :rich_file
         validates_attachment_presence :rich_file
         validate :check_content_type
@@ -87,8 +87,6 @@ module Rich
         rich_file.instance_write(:file_name, "#{filename}.#{extension}")
       end
 
-      module ClassMethods
-      end
     end
   end
 

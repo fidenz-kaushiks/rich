@@ -95,23 +95,23 @@ rich.Browser.prototype = {
 	  }
 	},
 
-    toggleViewMode: function(switchMode) {
-      if(switchMode==true) {
-        this._options.viewModeGrid = !this._options.viewModeGrid;
-      } else {
-        this._options.viewModeGrid = ($.QueryString["viewMode"]=="grid") ? false : true;
-      }
+  toggleViewMode: function(switchMode) {
+    if(switchMode==true) {
+      this._options.viewModeGrid = !this._options.viewModeGrid;
+    } else {
+      this._options.viewModeGrid = ($.QueryString["viewMode"]=="grid") ? false : true;
+    }
 
-      if(this._options.viewModeGrid == true) {
-        $('#view-grid').hide();
-        $('#view-list').show();
-        $('#items').addClass('list');
-      } else {
-        $('#view-grid').show();
-        $('#view-list').hide();
-        $('#items').removeClass('list');
-      }
-    },
+    if(this._options.viewModeGrid == true) {
+      $('#view-grid').hide();
+      $('#view-list').show();
+      $('#items').addClass('list');
+    } else {
+      $('#view-grid').show();
+      $('#view-list').hide();
+      $('#items').removeClass('list');
+    }
+  },
 
   toggleSortOrder: function(switchMode) {
     if(switchMode==true) this._options.sortAlphabetically = !this._options.sortAlphabetically;
@@ -147,18 +147,21 @@ rich.Browser.prototype = {
 
     if (type == 'folder') {
       this.showLoadingIconAndRefreshList();
+      this._options.searchQuery = '';
       // get items inside the folder
-
       $.ajax({
         url: this.updateUrlParameter(self.urlWithParams(),id),
         type: 'get',
         dataType: 'script',
         success: function(e) {
           self.setLoading(false);
-          self._options.previousParent.push(parent);
           // change folders' parent and its' level
           self._folder.parent_id = id;
           self._folder.current_level++;
+          $('#rich-search input').val('');
+          $.get("parents/"+id, function(data, status){
+            self._options.previousParent = data.folder_array;
+          });
         }
       });
     } else {
@@ -316,7 +319,7 @@ rich.Browser.prototype = {
   // update at url
   updateUrlParameter: function (url, value) {
     if (url.search('parent_id') != -1) {
-      return url.replace(/(parent_id=)[^\&]+/, '$1' + value);
+      return (url.replace(/(parent_id=)[^\&]+/, '$1' + value));
     } else {
       return (url += '&parent_id=' + value);
     }
