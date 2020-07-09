@@ -1,14 +1,14 @@
 module Rich
   module FilesHelper
 
-    def thumb_for_file(item)
+    def thumb_for_file(item, size=:thumb)
       if item.class.name == 'Rich::StorageFolder'
         get_icon_url 'icons/icon-empty.png'
       elsif item.image?
         if item.class.name == 'Rich::RichFile'
-          item.rich_file.url(:rich_thumb)
+          item.rich_file.url(size.to_sym)
         else
-          get_image_url(item)
+          get_image_url(item, "100X100")
         end
       else
         case item.blob.content_type
@@ -50,14 +50,14 @@ module Rich
       end
     end
 
-    def get_image_url(image_file)
+    def get_image_url(image_file, ratio)
       Rails.application.routes.url_helpers.rails_representation_url(
         image_file.variant(
           combine_options: {
           auto_orient: true,
           gravity: "center",
-          resize: "100x100^",
-          crop: "100x100+0+0"
+          resize: ratio+"^",
+          crop: "#{ratio}+0+0"
         }).processed, only_path: true).remove("/rich")
     end
 
