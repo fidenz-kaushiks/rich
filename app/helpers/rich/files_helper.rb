@@ -41,7 +41,7 @@ module Rich
         when 'text/plain'
           get_icon_url 'icons/icon-txt.png'
         when 'video/mp4' || 'application/mp4' || 'audio/mp4'
-          get_icon_url 'icons/icon-mp4.png'
+          get_icon_url 'icons/icon-unknown.png'
         when 'folder'
           get_icon_url 'icons/icon-empty.png'
         else
