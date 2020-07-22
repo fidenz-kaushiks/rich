@@ -33,15 +33,17 @@ module Rich
         end
 
         if params[:alpha] == 'true'
-          files   = files.sort_by {|file| file.blob.filename}
-          folders = folders.sort_by {|folder| folder.folder_name}
+          files   = files.sort_by {|file| file.blob.filename.downcase}
+          folders = folders.sort_by {|folder| folder.folder_name.downcase}
         end
 
         unless params[:search].blank?
           all_folders = StorageFolder.all
 
-          files   = all_folders.map(&:files).flatten.select { |file| file.blob.filename.to_s.include?(params[:search]) }
-          folders = all_folders.select { |folder| folder.folder_name.include?(params[:search]) }
+          search_name = params[:search].downcase
+
+          files   = all_folders.map(&:files).flatten.select { |file| file.blob.filename.to_s.downcase.include?(search_name) }
+          folders = all_folders.select { |folder| folder.folder_name.downcase.include?(search_name) }
         end
 
         start_point = (current_page - 1) * per_page
